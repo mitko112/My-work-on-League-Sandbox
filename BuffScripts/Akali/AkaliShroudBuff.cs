@@ -1,9 +1,17 @@
-﻿using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Enums;
-using GameServerCore.Scripting.CSharp;
-using LeagueSandbox.GameServer.GameObjects.Stats;
+using System.Numerics;
+using LeagueSandbox.GameServer.API;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects;
 
 namespace Buffs
 {
@@ -14,13 +22,13 @@ namespace Buffs
         public int MaxStacks => 1;
         public bool IsHidden => false;
 
-        public IStatsModifier StatsModifier { get; private set; } = new StatsModifier();
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             var owner = ownerSpell.CastInfo.Owner;
             var Champs = GetChampionsInRange(unit.Position, 50000, true);
-            foreach (IChampion player in Champs)
+            foreach (Champion player in Champs)
             {
                 if (player.Team.Equals(owner.Team))
                 {
@@ -38,23 +46,16 @@ namespace Buffs
             unit.SetStatus(StatusFlags.Targetable, false);
         }
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             var owner = ownerSpell.CastInfo.Owner;
             var Champs = GetChampionsInRange(unit.Position, 50000, true);
-            foreach (IChampion player in Champs)
+            foreach (Champion player in Champs)
             {
                 owner.SetInvisible((int)player.GetPlayerId(), owner, 1f, 0.1f);
             }
             unit.SetStatus(StatusFlags.Targetable, true);
         }
 
-        public void OnPreAttack(ISpell spell)
-        {
-        }
-
-        public void OnUpdate(float diff)
-        {
-        }
     }
 }
