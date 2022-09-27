@@ -1,43 +1,32 @@
-﻿using System.Numerics;
+using System.Numerics;
 using GameServerCore.Enums;
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using LeagueSandbox.GameServer.API;
 using GameServerCore.Scripting.CSharp;
-using GameServerCore.Domain.GameObjects.Spell.Sector;
-using System.Collections.Generic;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
 
 namespace Spells
 {
     public class StaticField : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
             TriggersSpellCasts = true
             // TODO
         };
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
         }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
-        {
-        }
 
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
-        {
-        }
-
-        public void OnSpellCast(ISpell spell)
-        {
-        }
-
-        public void TargetExecute(ISpell spell, IAttackableUnit unit, ISpellMissile mis, ISpellSector sector)
+        public void TargetExecute(Spell spell, AttackableUnit unit, SpellMissile mis, SpellSector sector)
         {
             var Owner = spell.CastInfo.Owner;
             float AP = Owner.Stats.AbilityPower.Total;
@@ -46,8 +35,8 @@ namespace Spells
             unit.TakeDamage(Owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
         }
 
-        public ISpellSector DRMundoWAOE;
-        public void OnSpellPostCast(ISpell spell)
+        public SpellSector DRMundoWAOE;
+        public void OnSpellPostCast(Spell spell)
         {
             DRMundoWAOE = spell.CreateSpellSector(new SectorParameters
             {
@@ -63,21 +52,6 @@ namespace Spells
             CreateTimer(0.1f, () => { DRMundoWAOE.SetToRemove(); });
         }
 
-        public void OnSpellChannel(ISpell spell)
-        {
-        }
-
-        public void OnSpellChannelCancel(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostChannel(ISpell spell)
-        {
-        }
-
-        public void OnUpdate(float diff)
-        {
-        }
+        
     }
 }
-
