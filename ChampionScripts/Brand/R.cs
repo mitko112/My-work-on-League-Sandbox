@@ -1,20 +1,23 @@
-using GameServerCore.Enums;
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
+using GameServerCore.Enums;
 using LeagueSandbox.GameServer.API;
-using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using GameServerCore.Scripting.CSharp;
-using GameServerCore.Domain.GameObjects.Spell.Sector;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
 using System;
 
 namespace Spells
 {
     public class BrandWildfire : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
             CastingBreaksStealth = true,
             DoesntBreakShields = true,
@@ -31,28 +34,13 @@ namespace Spells
 
         bool doOnce = false;
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
         }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
-        {
-        }
 
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
-        {
-        }
-
-        public void OnSpellCast(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostCast(ISpell spell)
-        {
-        }
-
-        public void TargetExecute(ISpell spell, IAttackableUnit target, ISpellMissile missile, ISpellSector sector)
+        public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
         {
             var owner = spell.CastInfo.Owner;
             var ap = owner.Stats.AbilityPower.Total * 0.5f;
@@ -62,13 +50,13 @@ namespace Spells
 
             LogInfo("Removed BrandWildfire: " + !HasBuff(owner, "BrandWildfire"));
 
-            if (target is IObjAiBase aiTarget)
+            if (target is ObjAIBase aiTarget)
             {
                 AddBuff("BrandWildfire", 4.0f, 1, spell, owner, aiTarget);
 
                 doOnce = false;
 
-                var units = GetUnitsInRange(target.Position, 600.0f, true).FindAll(unit => unit != target && unit.Team != owner.Team && !(unit is IObjBuilding || unit is IBaseTurret) && !unit.HasBuff("BrandPassive") && !unit.IsDead);
+                var units = GetUnitsInRange(target.Position, 600.0f, true).FindAll(unit => unit != target && unit.Team != owner.Team && !(unit is ObjBuilding || unit is BaseTurret) && !unit.HasBuff("BrandPassive") && !unit.IsDead);
 
                 // Randomize units list.
                 Random rng = new Random();
@@ -77,7 +65,7 @@ namespace Spells
                 {
                     n--;
                     int k = rng.Next(n + 1);
-                    IAttackableUnit value = units[k];
+                    AttackableUnit value = units[k];
                     units[k] = units[n];
                     units[n] = value;
                 }
@@ -86,7 +74,7 @@ namespace Spells
                 {
                     foreach (var unit in units.GetRange(0, units.Count))
                     {
-                        if (unit == target || unit.Team == owner.Team || unit is IObjBuilding || unit is IBaseTurret)
+                        if (unit == target || unit.Team == owner.Team || unit is ObjBuilding || unit is BaseTurret)
                         {
                             continue;
                         }
@@ -165,26 +153,12 @@ namespace Spells
             }
         }
 
-        public void OnSpellChannel(ISpell spell)
-        {
-        }
-
-        public void OnSpellChannelCancel(ISpell spell, ChannelingStopSource reason)
-        {
-        }
-
-        public void OnSpellPostChannel(ISpell spell)
-        {
-        }
-
-        public void OnUpdate(float diff)
-        {
-        }
+      
     }
 
     public class BrandWildfireMissile : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
             DoesntBreakShields = true,
             TriggersSpellCasts = true,
@@ -201,20 +175,13 @@ namespace Spells
 
         bool doOnce = false;
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
-        {
-        }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
-        {
-        }
-
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
+        public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
         }
 
-        public void TargetExecute(ISpell spell, IAttackableUnit target, ISpellMissile missile, ISpellSector sector)
+        public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
         {
             var owner = spell.CastInfo.Owner;
             var ap = owner.Stats.AbilityPower.Total * 0.5f;
@@ -228,7 +195,7 @@ namespace Spells
 
             if (wildfireStacks <= 4)
             {
-                var units = GetUnitsInRange(target.Position, 600.0f, true).FindAll(unit => unit != target && unit.Team != owner.Team && !(unit is IObjBuilding || unit is IBaseTurret) && !unit.HasBuff("BrandPassive") && !unit.IsDead);
+                var units = GetUnitsInRange(target.Position, 600.0f, true).FindAll(unit => unit != target && unit.Team != owner.Team && !(unit is ObjBuilding || unit is BaseTurret) && !unit.HasBuff("BrandPassive") && !unit.IsDead);
 
                 // Randomize units list.
                 Random rng = new Random();
@@ -237,7 +204,7 @@ namespace Spells
                 {
                     n--;
                     int k = rng.Next(n + 1);
-                    IAttackableUnit value = units[k];
+                    AttackableUnit value = units[k];
                     units[k] = units[n];
                     units[n] = value;
                 }
@@ -251,7 +218,7 @@ namespace Spells
                 {
                     foreach (var unit in units.GetRange(0, units.Count - wildfireStacks))
                     {
-                        if (unit == target || unit.Team == owner.Team || unit is IObjBuilding || unit is IBaseTurret)
+                        if (unit == target || unit.Team == owner.Team || unit is ObjBuilding || unit is BaseTurret)
                         {
                             continue;
                         }
@@ -331,28 +298,6 @@ namespace Spells
             }
         }
 
-        public void OnSpellCast(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostCast(ISpell spell)
-        {
-        }
-
-        public void OnSpellChannel(ISpell spell)
-        {
-        }
-
-        public void OnSpellChannelCancel(ISpell spell, ChannelingStopSource reason)
-        {
-        }
-
-        public void OnSpellPostChannel(ISpell spell)
-        {
-        }
-
-        public void OnUpdate(float diff)
-        {
-        }
+        
     }
 }
