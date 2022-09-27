@@ -1,77 +1,75 @@
+
+
 using System.Numerics;
 using GameServerCore.Enums;
-using GameServerCore.Domain.GameObjects;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
 using LeagueSandbox.GameServer.API;
-using System.Collections.Generic;
 using GameServerCore.Scripting.CSharp;
-using GameServerCore.Domain.GameObjects.Spell.Sector;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 
 namespace Spells
 {
-    public class AkaliMota : ISpellScript
+    public class AkaliShadowDance : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
-            MissileParameters = new MissileParameters
-            {
-                Type = MissileType.Target
-            },
             TriggersSpellCasts = true
-
             // TODO
         };
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+
+        Spell Spell;
+        AttackableUnit Target;
+
+
+
+
+        public void OnSpellCast(Spell spell)
         {
-            ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
+            Spell = spell;
+            var target = spell.CastInfo.Targets[0].Unit;
+            Target = target;
         }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
-        {
-        }
+        public void OnSpellPostCast(Spell spell)
 
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
         {
-        }
 
-        public void OnSpellCast(ISpell spell)
-        {
-        }
 
-        public void OnSpellPostCast(ISpell spell)
-        {
-        }
-
-        public void TargetExecute(ISpell spell, IAttackableUnit target, ISpellMissile missile, ISpellSector sector)
-        {
             var owner = spell.CastInfo.Owner;
-            var AP = owner.Stats.AbilityPower.Total * 0.4f;
-            var damage = 15f + spell.CastInfo.SpellLevel * 20f + AP;
             
-            target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_ATTACK, false);
-            AddBuff("AkaliMota", 6f, 1, spell, target, owner);
-            AddBuff("AkaliMotaImpact", 6f, 1, spell, owner, owner);
-            missile.SetToRemove();
+            var current = owner.Position;
+            var to = Vector2.Normalize(Target.Position - current);
+            var range = to * 800;
+
+            var trueCoords = current + range;
+
+            //TODO: Dash to the correct location (in front of the enemy IChampion) instead of far behind or inside them
+            //ForceMovement(owner, target, "Spell4", 1000, 0, 0, 0, 200);
+            ForceMovement(owner, "Spell4", Target.Position, 2200, 0, 0, 0);
+            //ForceMovement(spell.CastInfo.Owner, "Spell4", trueCoords, 2200, 0, 0, 0);
+            AddParticleTarget(owner, Target, "akali_shadowDance_tar", Target);
+
+
+            ApiEventManager.OnMoveEnd.AddListener(owner, owner, ApplyEffects, true);
         }
 
-        public void OnSpellChannel(ISpell spell)
+        public void ApplyEffects(AttackableUnit target)
         {
+            
+            var owner = Spell.CastInfo.Owner;
+            var bonusAd = owner.Stats.AttackDamage.Total - owner.Stats.AttackDamage.BaseValue;
+            var ap = owner.Stats.AbilityPower.Total * 0.9f;
+            var damage = 200 + Spell.CastInfo.SpellLevel * 150 + bonusAd + ap;
+            Target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL,
+                DamageSource.DAMAGE_SOURCE_SPELL, false);
         }
 
-        public void OnSpellChannelCancel(ISpell spell, ChannelingStopSource reason)
-        {
-        }
-
-        public void OnSpellPostChannel(ISpell spell)
-        {
-        }
-
-        public void OnUpdate(float diff)
-        {
-        }
+ 
     }
 }
