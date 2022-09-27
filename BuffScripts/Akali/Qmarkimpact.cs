@@ -1,30 +1,36 @@
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Enums;
-using GameServerCore.Scripting.CSharp;
+using System.Numerics;
 using LeagueSandbox.GameServer.API;
-using LeagueSandbox.GameServer.GameObjects.Stats;
-using LeagueSandbox.GameServer.Scripting.CSharp;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects;
 
 
 namespace Buffs
 {
     internal class AkaliMotaImpact : IBuffGameScript
     {
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.DAMAGE,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
             MaxStacks = 1
         };
 
-        IBuff thisBuff;
+        Buff thisBuff;
 
 
-        public IStatsModifier StatsModifier { get; private set; } = new StatsModifier();
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
 
             thisBuff = buff;
@@ -33,7 +39,7 @@ namespace Buffs
 
 
 
-            if (unit is IObjAiBase obj)
+            if (unit is ObjAIBase obj)
             {
                 ApiEventManager.OnLaunchAttack.AddListener(this, obj, TargetExecute, true);
 
@@ -43,7 +49,7 @@ namespace Buffs
             }
 
         }
-        public void TargetExecute(ISpell spell)
+        public void TargetExecute(Spell spell)
         {
 
 
@@ -52,7 +58,7 @@ namespace Buffs
             var owner = spell.CastInfo.Owner;
             float ap = owner.Stats.AbilityPower.Total * 0.5f;
             var target = spell.CastInfo.Targets[0].Unit;
-            float damage = 45 * owner.GetSpell(0).CastInfo.SpellLevel + ap;
+            float damage = 45 + 25 * (owner.GetSpell("AkaliMota").CastInfo.SpellLevel - 1) + ap;
 
             if (target.HasBuff("AkaliMota"))
 
@@ -70,7 +76,7 @@ namespace Buffs
         }
 
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
 
             thisBuff.DeactivateBuff();
@@ -85,6 +91,8 @@ namespace Buffs
         }
     }
 }
+
+
 
 
     
