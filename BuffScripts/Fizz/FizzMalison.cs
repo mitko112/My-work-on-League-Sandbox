@@ -1,45 +1,58 @@
-﻿using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Enums;
-using GameServerCore.Scripting.CSharp;
-using LeagueSandbox.GameServer.API;
-using LeagueSandbox.GameServer.GameObjects.Stats;
+﻿using GameServerCore.Enums;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
 
 namespace Buffs
+
 {
-    internal class FizzMalison : IBuffGameScript
+    internal class FizzMalison: IBuffGameScript
     {
-        public BuffType BuffType => BuffType.COMBAT_ENCHANCER;
-        public BuffAddType BuffAddType => BuffAddType.STACKS_AND_RENEWS;
-        public int MaxStacks => 1;
-        public bool IsHidden => false;
-        private IObjAiBase Owner;
-        private ISpell daspell;
-        private IObjAiBase daowner;
-
-        public IStatsModifier StatsModifier { get; private set; } = new StatsModifier();
-
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
-            Owner = ownerSpell.CastInfo.Owner;
-            daowner = Owner;
-            daspell = ownerSpell;
+            BuffType = BuffType.INTERNAL,
+            BuffAddType = BuffAddType.REPLACE_EXISTING,
+            MaxStacks = 1
+        };
 
-            ApiEventManager.OnHitUnit.AddListener(this, ownerSpell.CastInfo.Owner, TargetTakePoison, false);
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
+
+        ObjAIBase owner;
+        AttackableUnit Unit;
+        Particle p;
+        float damage;
+        float timeSinceLastTick = 500f;
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
+        {
+            owner = ownerSpell.CastInfo.Owner;
+            Unit = unit;
+
+            var missinghealth = (Unit.Stats.HealthPoints.Total - Unit.Stats.CurrentHealth);
+
+            var AP = ownerSpell.CastInfo.Owner.Stats.AbilityPower.Total * 0.35f;
+            damage = 10 + missinghealth * 0.013f * (ownerSpell.CastInfo.SpellLevel + AP);
+
+
         }
 
-        public void TargetTakePoison(IAttackableUnit target, bool isCrit)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            AddBuff("FizzSeastoneTrident", 4f, 1, daspell, target, daowner);
-        }
-
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
-        {
+            
         }
 
         public void OnUpdate(float diff)
         {
+            timeSinceLastTick += diff;
+            if (timeSinceLastTick >= 1000f && !Unit.IsDead && Unit != null)
+            {
+                Unit.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_PERIODIC, false);
+                timeSinceLastTick = 0;
+            }
         }
     }
 }
