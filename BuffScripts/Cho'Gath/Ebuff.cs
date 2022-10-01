@@ -1,19 +1,25 @@
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Domain.GameObjects.Spell.Sector;
-using GameServerCore.Enums;
-using GameServerCore.Scripting.CSharp;
+using System.Numerics;
 using LeagueSandbox.GameServer.API;
-using LeagueSandbox.GameServer.GameObjects.Stats;
-using LeagueSandbox.GameServer.Scripting.CSharp;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects;
+
 namespace Buffs
 
 
 {
     internal class VorpalSpikes : IBuffGameScript
     {
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.DAMAGE,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
@@ -21,14 +27,14 @@ namespace Buffs
         };
         
 
-        public IStatsModifier StatsModifier { get; private set; } = new StatsModifier();
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
         
 
 
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
 
-            if (unit is IObjAiBase obj)
+            if (unit is ObjAIBase obj)
             {
                 ApiEventManager.OnLaunchAttack.AddListener(this, obj, TargetExecute, false);
 
@@ -37,7 +43,7 @@ namespace Buffs
 
             }
         }
-        public void TargetExecute(ISpell spell)
+        public void TargetExecute(Spell spell)
 
 
         {
@@ -51,7 +57,7 @@ namespace Buffs
             var owner = spell.CastInfo.Owner;
             var target = spell.CastInfo.Targets[0].Unit;
             float AP = owner.Stats.AbilityPower.Total * 0.3f;
-            float damage = 20 * owner.GetSpell(2).CastInfo.SpellLevel + AP;
+            float damage = 20 * (owner.GetSpell("VorpalSpikes").CastInfo.SpellLevel - 2) + AP;
 
 
 
@@ -62,14 +68,14 @@ namespace Buffs
             var units = GetUnitsInRange(owner.Position, 500f, true);
             for (int i = 0; i < units.Count; i++)
             {
-                if (!(units[i].Team == owner.Team || units[i] is IBaseTurret || units[i] is IObjBuilding || units[i] is IInhibitor))
+                if (!(units[i].Team == owner.Team || units[i] is BaseTurret || units[i] is ObjBuilding || units[i] is Inhibitor))
                 {
                     units[i].TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
 
                 }
             }
         }
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             ApiEventManager.OnLaunchAttack.RemoveListener(this);
 
