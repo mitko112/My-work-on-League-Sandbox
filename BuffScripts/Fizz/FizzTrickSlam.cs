@@ -1,35 +1,36 @@
-﻿using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Enums;
+﻿using GameServerCore.Enums;
 using GameServerCore.Scripting.CSharp;
-using LeagueSandbox.GameServer.GameObjects.Stats;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
 
 namespace Buffs
 {
     internal class FizzTrickSlam : IBuffGameScript
     {
-        
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.COMBAT_ENCHANCER,
-            BuffAddType = BuffAddType.REPLACE_EXISTING,
+            BuffAddType = BuffAddType.RENEW_EXISTING,
             MaxStacks = 1
         };
-        
 
-        public IStatsModifier StatsModifier { get; private set; } = new StatsModifier();
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        private IObjAiBase Owner;
-        private ISpell Spell;
-        private IAttackableUnit Target;
+        private ObjAIBase Owner;
+        private Spell Spell;
+        private AttackableUnit Target;
         private float ticks;
         private float damage;
         private float true1 = 0;
         private float true2 = 1;
 
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             Owner = ownerSpell.CastInfo.Owner;
             Target = unit;
@@ -40,11 +41,11 @@ namespace Buffs
             damage = 24f + (14f * (ownerSpell.CastInfo.SpellLevel - 1)) + APratio;
         }
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
         }
 
-        public void OnPreAttack(ISpell spell)
+        public void OnPreAttack(Spell spell)
         {
         }
 
@@ -64,7 +65,7 @@ namespace Buffs
                 var units = GetUnitsInRange(Target.Position, 350f, true);
                 for (int i = units.Count - 1; i >= 0; i--)
                 {
-                    if (units[i].Team != Spell.CastInfo.Owner.Team && !(units[i] is IObjBuilding || units[i] is IBaseTurret) && units[i] is IObjAiBase ai)
+                    if (units[i].Team != Spell.CastInfo.Owner.Team && !(units[i] is ObjBuilding || units[i] is BaseTurret) && units[i] is ObjAIBase ai)
                     {
                         units[i].TakeDamage(Owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
                         AddBuff("FizzESlow", 2f, 1, Spell, units[i], Owner);
