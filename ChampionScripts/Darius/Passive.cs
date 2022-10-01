@@ -1,12 +1,10 @@
-using GameServerCore.Domain.GameObjects;
-using LeagueSandbox.GameServer.Scripting.CSharp;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
-using System.Numerics;
+
 using GameServerCore.Scripting.CSharp;
-using LeagueSandbox.GameServer.API;
-using GameServerCore.Domain;
 using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 
@@ -16,11 +14,11 @@ namespace CharScripts
     public class CharScriptDarius : ICharScript
 
     {
-        ISpell Spell;
+        Spell Spell;
         int counter;
-        IAttackableUnit Target;
+        AttackableUnit Target;
         
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
 
         {
 
@@ -31,7 +29,7 @@ namespace CharScripts
                 ApiEventManager.OnHitUnit.AddListener(this, owner, OnHitUnit, false);
             }
         }
-        public void OnHitUnit(IDamageData damageData)
+        public void OnHitUnit(DamageData damageData)
 
         
         {
@@ -44,7 +42,7 @@ namespace CharScripts
 
 
  
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
+        public void OnDeactivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnHitUnit.RemoveListener(this);
         }
