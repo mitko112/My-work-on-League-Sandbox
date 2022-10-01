@@ -1,19 +1,21 @@
 using GameServerCore.Enums;
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
+
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
 using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.API;
-using GameServerCore.Domain.GameObjects.Spell.Sector;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 
 namespace Spells
 {
     public class CassiopeiaPetrifyingGaze : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
             TriggersSpellCasts = true,
             IsDamagingSpell = true,
@@ -21,24 +23,14 @@ namespace Spells
             // TODO
         };
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
         }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
-        {
-        }
+       
 
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
-        {
-        }
-
-        public void OnSpellCast(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostCast(ISpell spell)
+        public void OnSpellPostCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner;
 
@@ -58,7 +50,7 @@ namespace Spells
             AddParticleTarget(owner, owner, "CassPetrify_cas.troy", owner, 1f, 1f);
         }
 
-        public void TargetExecute(ISpell spell, IAttackableUnit target, ISpellMissile missile, ISpellSector sector)
+        public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
         {
             var owner = spell.CastInfo.Owner;
 
@@ -70,20 +62,8 @@ namespace Spells
             AddBuff("Stun", 2f, 1, spell, target, owner);
         }
 
-        public void OnSpellChannel(ISpell spell)
-        {
-        }
-
-        public void OnSpellChannelCancel(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostChannel(ISpell spell)
-        {
-        }
-
-        public void OnUpdate(float diff)
-        {
-        }
+        
     }
+}
+
 }
