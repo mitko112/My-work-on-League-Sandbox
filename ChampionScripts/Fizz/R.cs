@@ -1,22 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Numerics;
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
-using GameServerCore.Enums;
-using LeagueSandbox.GameServer.API;
+﻿using GameServerCore.Enums;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
+using System.Numerics;
 using GameServerCore.Scripting.CSharp;
-using GameServerCore.Domain;
-using GameServerCore.Domain.GameObjects.Spell.Sector;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
+using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.API;
+using GameMaths;
 
 namespace Spells
 {
     public class FizzMarinerDoom : ISpellScript
     {
-        IObjAiBase Owner;
-        public ISpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
+        ObjAIBase Owner;
+        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
             MissileParameters = new MissileParameters
             {
@@ -26,24 +27,24 @@ namespace Spells
             IsDamagingSpell = true
         };
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
         }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
+        public void OnDeactivate(ObjAIBase owner, Spell spell)
         {
         }
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
+        public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
         }
 
-        public void OnSpellCast(ISpell spell)
+        public void OnSpellCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner;
 
         }
 
-        public void OnSpellPostCast(ISpell spell)
+        public void OnSpellPostCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner;
             var ownerSkinID = owner.SkinID;
@@ -52,15 +53,15 @@ namespace Spells
             SpellCast(owner, 4, SpellSlotType.ExtraSlots, trueCoords, targetPos, true, owner.Position);
         }
 
-        public void OnSpellChannel(ISpell spell)
+        public void OnSpellChannel(Spell spell)
         {
         }
 
-        public void OnSpellChannelCancel(ISpell spell)
+        public void OnSpellChannelCancel(Spell spell, ChannelingStopSource reason)
         {
         }
 
-        public void OnSpellPostChannel(ISpell spell)
+        public void OnSpellPostChannel(Spell spell)
         {
         }
 
@@ -72,9 +73,10 @@ namespace Spells
 
     public class FizzMarinerDoomMissile : ISpellScript
     {
-        IBuff HandlerBuff;
-        IMinion Fish;
-        public ISpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
+        Buff HandlerBuff;
+        Minion Fish;
+        bool hasHitEnemy = false;
+        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
             MissileParameters = new MissileParameters
             {
@@ -83,19 +85,20 @@ namespace Spells
             IsDamagingSpell = true
             // TODO
         };
-        IAttackableUnit Target;
+        AttackableUnit Target;
+        public SpellSector BindSector;
 
         //Vector2 direction;
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
         }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
+        public void OnDeactivate(ObjAIBase owner, Spell spell)
         {
         }
 
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
+        public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
             var missile = spell.CreateSpellMissile(new MissileParameters
             {
@@ -106,38 +109,40 @@ namespace Spells
         }
 
 
-        public void TargetExecute(ISpell spell, IAttackableUnit target, ISpellMissile missile, ISpellSector sector)
+        public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
         {
             var owner = spell.CastInfo.Owner;
             float ap = owner.Stats.AbilityPower.Total;
             float damage = 75 + (spell.CastInfo.SpellLevel - 1) * 40 + ap;
-            if (missile is ISpellCircleMissile circleMissle && circleMissle.ObjectsHit.Count == 1)
+            if (missile is SpellCircleMissile circleMissle && circleMissle.ObjectsHit.Count == 1)
             {
                 missile.SetToRemove();
 
                 AddParticleTarget(owner, target, "Fizz_UltimateMissile_Orbit.troy", target, 1.5f);
                 AddParticleTarget(owner, target, "Fizz_Ring_Green.troy", target, 1.5f);
                 AddBuff("FizzChurnTheWatersCling", 1.5f, 1, spell, target, owner);
+                hasHitEnemy = true;
             }
 
+
         }
-        public void OnSpellCast(ISpell spell)
+        public void OnSpellCast(Spell spell)
         {
         }
 
-        public void OnSpellPostCast(ISpell spell)
+        public void OnSpellPostCast(Spell spell)
         {
         }
 
-        public void OnSpellChannel(ISpell spell)
+        public void OnSpellChannel(Spell spell)
         {
         }
 
-        public void OnSpellChannelCancel(ISpell spell)
+        public void OnSpellChannelCancel(Spell spell, ChannelingStopSource reason)
         {
         }
 
-        public void OnSpellPostChannel(ISpell spell)
+        public void OnSpellPostChannel(Spell spell)
         {
         }
 
