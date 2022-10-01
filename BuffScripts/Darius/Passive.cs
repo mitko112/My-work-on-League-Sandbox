@@ -1,41 +1,46 @@
-using GameServerCore.Enums;
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Scripting.CSharp;
+using System.Numerics;
 using LeagueSandbox.GameServer.API;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
-using System.Collections.Generic;
-using System.Numerics;
-using LeagueSandbox.GameServer.GameObjects.Stats;
 using LeagueSandbox.GameServer.Scripting.CSharp;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects;
+
 
 
 namespace Buffs
 {
     public class DariusHemoMarker : IBuffGameScript
     {
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.DAMAGE,
             BuffAddType = BuffAddType.STACKS_AND_RENEWS,
             MaxStacks = 5
         };
 
-        public IStatsModifier StatsModifier { get; private set; }
-        IAttackableUnit Unit;
+        public StatsModifier StatsModifier { get; private set; }
+        AttackableUnit Unit;
         float damage;
         float timeSinceLastTick = 900f;
-        IObjAiBase owner;
-        IParticle p;
-        IParticle p2;
-        IParticle p3;
-        IParticle p4;
-        IParticle p5;
-        IParticle p6;
-        IParticle p7;
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        ObjAIBase owner;
+        Particle p;
+        Particle p2;
+        Particle p3;
+        Particle p4;
+        Particle p5;
+        Particle p6;
+        Particle p7;
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            owner = ownerSpell.CastInfo.Owner as IChampion;
+            owner = ownerSpell.CastInfo.Owner as Champion;
             Unit = unit;
             var ADratio = owner.Stats.AttackDamage.Total * 0.3f;
             switch (buff.StackCount)
@@ -76,13 +81,13 @@ namespace Buffs
                     break;
             }
         }
-        public void Blood(ISpell spell)
+        public void Blood(Spell spell)
         {
-            owner = spell.CastInfo.Owner as IChampion;
+            owner = spell.CastInfo.Owner as Champion;
             AddBuff("DariusHemoVisual", 6.0f, 1, spell, owner, owner);
         }
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             RemoveParticle(p);
         }
