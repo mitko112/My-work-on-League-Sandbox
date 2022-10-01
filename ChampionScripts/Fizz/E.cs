@@ -1,16 +1,17 @@
-﻿using System.Numerics;
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
+using System.Numerics;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using GameServerCore.Scripting.CSharp;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 
 namespace Spells
 {
     public class FizzJump : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
             CastingBreaksStealth = true,
             DoesntBreakShields = true,
@@ -21,23 +22,23 @@ namespace Spells
         };
         float ticks = 0;
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
         }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
+        public void OnDeactivate(ObjAIBase owner, Spell spell)
         {
         }
 
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
+        public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
         }
 
-        public void OnSpellCast(ISpell spell)
+        public void OnSpellCast(Spell spell)
         {
         }
 
-        public void OnSpellPostCast(ISpell spell)
+        public void OnSpellPostCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner;
             if (!owner.HasBuff("FizzBuffer") && !owner.HasBuff("FizzTrickSlam"))
@@ -60,15 +61,15 @@ namespace Spells
             }
         }
 
-        public void OnSpellChannel(ISpell spell)
+        public void OnSpellChannel(Spell spell)
         {
         }
 
-        public void OnSpellChannelCancel(ISpell spell)
+        public void OnSpellChannelCancel(Spell spell, ChannelingStopSource reason)
         {
         }
 
-        public void OnSpellPostChannel(ISpell spell)
+        public void OnSpellPostChannel(Spell spell)
         {
         }
 
@@ -83,7 +84,7 @@ namespace Spells
 
     public class FizzJumpTwo : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
             CastingBreaksStealth = true,
             DoesntBreakShields = true,
@@ -93,23 +94,23 @@ namespace Spells
             // TODO
         };
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
         }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
+        public void OnDeactivate(ObjAIBase owner, Spell spell)
         {
         }
 
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
+        public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
         }
 
-        public void OnSpellCast(ISpell spell)
+        public void OnSpellCast(Spell spell)
         {
         }
 
-        public void OnSpellPostCast(ISpell spell)
+        public void OnSpellPostCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner;
             var trueCoords = new Vector2(spell.CastInfo.TargetPosition.X, spell.CastInfo.TargetPosition.Z);
@@ -126,15 +127,15 @@ namespace Spells
 
         }
 
-        public void OnSpellChannel(ISpell spell)
+        public void OnSpellChannel(Spell spell)
         {
         }
 
-        public void OnSpellChannelCancel(ISpell spell)
+        public void OnSpellChannelCancel(Spell spell, ChannelingStopSource reason)
         {
         }
 
-        public void OnSpellPostChannel(ISpell spell)
+        public void OnSpellPostChannel(Spell spell)
         {
         }
 
@@ -149,7 +150,7 @@ namespace Spells
 
     public class FizzTrickSlam : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
             CastingBreaksStealth = true,
             DoesntBreakShields = true,
@@ -159,23 +160,23 @@ namespace Spells
             // TODO
         };
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
         }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
+        public void OnDeactivate(ObjAIBase owner, Spell spell)
         {
         }
 
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
+        public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
         }
 
-        public void OnSpellCast(ISpell spell)
+        public void OnSpellCast(Spell spell)
         {
         }
 
-        public void OnSpellPostCast(ISpell spell)
+        public void OnSpellPostCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner;
             var trueCoords = new Vector2(spell.CastInfo.TargetPosition.X, spell.CastInfo.TargetPosition.Z);
@@ -192,15 +193,15 @@ namespace Spells
 
         }
 
-        public void OnSpellChannel(ISpell spell)
+        public void OnSpellChannel(Spell spell)
         {
         }
 
-        public void OnSpellChannelCancel(ISpell spell)
+        public void OnSpellChannelCancel(Spell spell, ChannelingStopSource reason)
         {
         }
 
-        public void OnSpellPostChannel(ISpell spell)
+        public void OnSpellPostChannel(Spell spell)
         {
         }
 
@@ -209,3 +210,4 @@ namespace Spells
         }
     }
 }
+
