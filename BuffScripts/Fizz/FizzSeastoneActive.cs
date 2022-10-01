@@ -1,54 +1,74 @@
-﻿using GameServerCore.Domain;
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Enums;
-using GameServerCore.Scripting.CSharp;
+﻿using System.Numerics;
 using LeagueSandbox.GameServer.API;
-using LeagueSandbox.GameServer.GameObjects.Stats;
-using LeagueSandbox.GameServer.Scripting.CSharp;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects;
+
+
 
 namespace Buffs
 {
     internal class FizzSeastoneActive : IBuffGameScript
     {
-        
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
-            BuffType = BuffType.COMBAT_ENCHANCER,
-            BuffAddType = BuffAddType.RENEW_EXISTING,
+            BuffType = BuffType.DAMAGE,
+            BuffAddType = BuffAddType.REPLACE_EXISTING,
             MaxStacks = 1
         };
-        
-        private IObjAiBase Owner;
-        private float damage;
 
-        public IStatsModifier StatsModifier { get; private set; } = new StatsModifier();
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            Owner = ownerSpell.CastInfo.Owner;
-            var ap = ownerSpell.CastInfo.Owner.Stats.AbilityPower.Total * 0.30f;
-            damage = 5f + (ownerSpell.CastInfo.SpellLevel * 5) + ap;
-            AddParticleTarget(Owner, Owner, "Fizz_SeastoneTrident.troy", Owner, 5f, bone: "BUFFBONE_GLB_WEAPON_1");
-            AddParticleTarget(Owner, Owner, "Fizz_SeastonePassive_Weapon.troy", Owner, bone: "BUFFBONE_GLB_WEAPON_1");
 
-            ApiEventManager.OnHitUnit.AddListener(this, ownerSpell.CastInfo.Owner, TargetTakeDamage, false);
+            if (unit is ObjAIBase obj)
+            {
+                ApiEventManager.OnLaunchAttack.AddListener(this, obj, TargetExecute, false);
+
+
+
+
+            }
+        }
+        public void TargetExecute(Spell spell)
+
+
+        {
+
+            var owner = spell.CastInfo.Owner;
+            var target = spell.CastInfo.Targets[0].Unit;
+            var AP = owner.Stats.AbilityPower.Total;
+            float damage = 10 * owner.GetSpell("FizzSeastonePassive").CastInfo.SpellLevel + AP;
+            AddParticleTarget(owner, owner, "Fizz_SeastoneTrident.troy", owner, 5f, bone: "BUFFBONE_GLB_WEAPON_1");
+            AddParticleTarget(owner, owner, "Fizz_SeastonePassive_Weapon.troy", owner, bone: "BUFFBONE_GLB_WEAPON_1");
+
+
+            target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_ATTACK, false);
+
+
         }
 
-        public void TargetTakeDamage(IDamageData damageData)
-        {
-            var target = damageData.Target;
-            target.TakeDamage(Owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_ATTACK, false);
-        }
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            ApiEventManager.OnHitUnit.RemoveListener(this);
+            ApiEventManager.OnLaunchAttack.RemoveListener(this);
+
         }
 
         public void OnUpdate(float diff)
         {
+
         }
     }
 }
