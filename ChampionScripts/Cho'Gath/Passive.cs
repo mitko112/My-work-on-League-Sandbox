@@ -1,12 +1,9 @@
-using GameServerCore.Domain.GameObjects;
-using LeagueSandbox.GameServer.Scripting.CSharp;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
-using System.Numerics;
+
 using GameServerCore.Scripting.CSharp;
-using LeagueSandbox.GameServer.API;
-using GameServerCore.Domain;
 using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 
@@ -16,8 +13,8 @@ namespace CharScripts
     public class CharScriptChogath : ICharScript
 
     {
-        ISpell Spell;
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        Spell Spell;
+        public void OnActivate(ObjAIBase owner, Spell spell)
 
         {
 
@@ -28,7 +25,7 @@ namespace CharScripts
                 ApiEventManager.OnKillUnit.AddListener(this,owner , OnKillUnit, false);
             }
         }
-        public void OnKillUnit(IDeathData deathData)
+        public void OnKillUnit(DeathData deathData)
 
 
         {
@@ -44,7 +41,7 @@ namespace CharScripts
 
 
  
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
+        public void OnDeactivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnHitUnit.RemoveListener(this);
         }
