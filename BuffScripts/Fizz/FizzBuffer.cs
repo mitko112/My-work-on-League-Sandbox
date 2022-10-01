@@ -1,36 +1,38 @@
-﻿using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Enums;
+﻿using GameServerCore.Enums;
 using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.API;
-using LeagueSandbox.GameServer.GameObjects.Stats;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects;
 
 namespace Buffs
 {
     internal class FizzBuffer : IBuffGameScript
     {
-        
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.COMBAT_ENCHANCER,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
             MaxStacks = 1
         };
-        
 
-        public IStatsModifier StatsModifier { get; private set; } = new StatsModifier();
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        private IBuff ThisBuff;
-        private ISpell Spelll;
-        private IAttackableUnit Target;
-        private IObjAiBase Owner;
+        private Buff ThisBuff;
+        private Spell Spelll;
+        private AttackableUnit Target;
+        private ObjAIBase Owner;
         private float ticks = 0;
         private float damage;
 
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             ThisBuff = buff;
             Owner = ownerSpell.CastInfo.Owner;
@@ -47,11 +49,11 @@ namespace Buffs
             ApiEventManager.OnSpellPostCast.AddListener(this, ownerSpell.CastInfo.Owner.GetSpell("FizzJump"), EOnSpellPostCast);
         }
 
-        public void EOnSpellPostCast(ISpell spell)
+        public void EOnSpellPostCast(Spell spell)
         {
             bool triggeredSpell = true;
             var owner = spell.CastInfo.Owner;
-            var oowner = owner as IAttackableUnit;
+            var oowner = owner as AttackableUnit;
             var trueCoords = new Vector2(spell.CastInfo.TargetPosition.X, spell.CastInfo.TargetPosition.Z);
             var startPos = owner.Position;
             var to = trueCoords - startPos;
@@ -75,7 +77,7 @@ namespace Buffs
             buff.DeactivateBuff();
         }
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             buff.SetStatusEffect(StatusFlags.Targetable, true);
             buff.SetStatusEffect(StatusFlags.Ghosted, false);
@@ -99,7 +101,7 @@ namespace Buffs
                     var units = GetUnitsInRange(trueCoords, 200f, true);
                     for (int i = units.Count - 1; i >= 0; i--)
                     {
-                        if (units[i].Team != Spelll.CastInfo.Owner.Team && !(units[i] is IObjBuilding || units[i] is IBaseTurret) && units[i] is IObjAiBase ai)
+                        if (units[i].Team != Spelll.CastInfo.Owner.Team && !(units[i] is ObjBuilding || units[i] is BaseTurret) && units[i] is ObjAIBase ai)
                         {
                             units[i].TakeDamage(Owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
                             units.RemoveAt(i);
