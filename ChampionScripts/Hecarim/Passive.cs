@@ -1,24 +1,27 @@
-using GameServerCore.Domain.GameObjects;
-
-using GameServerCore.Domain.GameObjects.Spell;
-
+using GameServerCore.Enums;
 using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using System.Numerics;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 namespace Passives
 {
     public class HecarimPassive : ICharScript
     {
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
         AddBuff("HecarimPassive", 3.0f, 1, spell, owner, owner,true);
             
         }
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
-        {
-        }
-        public void OnUpdate(float diff)
-        {
-        }
+        
     }
 }
