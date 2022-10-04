@@ -1,19 +1,25 @@
-using GameServerCore.Domain;
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Enums;
-using GameServerCore.Scripting.CSharp;
+using System.Numerics;
 using LeagueSandbox.GameServer.API;
-using LeagueSandbox.GameServer.GameObjects.Stats;
-using LeagueSandbox.GameServer.Scripting.CSharp;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects;
+
 
 
 namespace Buffs
 {
     internal class HecarimRampAttack: IBuffGameScript
     {
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.DAMAGE,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
@@ -21,15 +27,15 @@ namespace Buffs
         };
 
 
-        public IStatsModifier StatsModifier { get; private set; } = new StatsModifier();
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        IBuff thisBuff;
-        IObjAiBase Unit;
+        Buff thisBuff;
+        ObjAIBase Unit;
         
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             thisBuff = buff;
-            if (unit is IObjAiBase ai)
+            if (unit is ObjAIBase ai)
             {
                 Unit = ai;
 
@@ -42,18 +48,18 @@ namespace Buffs
             
         }
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             //ApiEventManager.OnHitUnit.RemoveListener(this);
 
         }
-        public void TargetExecute(IDamageData damageData)
+        public void TargetExecute(DamageData damageData)
         {
             if (!thisBuff.Elapsed() && thisBuff != null && Unit != null)
             {
                 float ad = Unit.Stats.AttackDamage.FlatBonus;
                 
-                float damage =  80*Unit.GetSpell(2).CastInfo.SpellLevel + ad;
+                float damage =  80*(Unit.GetSpell("HecarimRamp").CastInfo.SpellLevel - 2) + ad;
                 var trueCoords = GetPointFromUnit(Unit, 450f);
                 var target = damageData.Target;
                 target.TakeDamage(Unit, damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_ATTACK, false);
