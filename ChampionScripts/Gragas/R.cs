@@ -1,28 +1,29 @@
-﻿using GameServerCore.Enums;
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
+using GameServerCore.Enums;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
-using LeagueSandbox.GameServer.API;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
-using GameServerCore.Scripting.CSharp;
-using GameServerCore.Domain.GameObjects.Spell.Sector;
 
 namespace Spells
 {
     public class GragasR : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
             TriggersSpellCasts = true,
         };
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
         }
-        public void TargetExecute(ISpell spell, IAttackableUnit target, ISpellMissile missile, ISpellSector sector)
+        public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
         {
             FaceDirection(pos, target);
             var pos2 = GetPointFromUnit(target, -500);
@@ -34,12 +35,12 @@ namespace Spells
 
             target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
         }
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
+        public void OnDeactivate(ObjAIBase owner, Spell spell)
         {
         }
         Vector2 pos;
-        public ISpellSector DamageSector;
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
+        public SpellSector DamageSector;
+        public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
 
             var spellPos = new Vector2(spell.CastInfo.TargetPositionEnd.X, spell.CastInfo.TargetPositionEnd.Z);
@@ -56,28 +57,6 @@ namespace Spells
             CreateTimer(1.0f, () => { var pre = AddParticle(owner, null, "Gragas_Base_R_End.troy", spellPos, lifetime: 4.0f); DamageSector.SetToRemove(); });
         }
 
-        public void OnSpellCast(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostCast(ISpell spell)
-        {
-        }
-
-        public void OnSpellChannel(ISpell spell)
-        {
-        }
-
-        public void OnSpellChannelCancel(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostChannel(ISpell spell)
-        {
-        }
-
-        public void OnUpdate(float diff)
-        {
-        }
     }
 }
+
