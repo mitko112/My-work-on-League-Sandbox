@@ -1,39 +1,42 @@
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
 using GameServerCore.Enums;
 using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 using LeagueSandbox.GameServer.Scripting.CSharp;
+using System.Numerics;
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
-namespace Buffs
+namespace Spells
 {
-    internal class JaxCounterStrikeAttack : IBuffGameScript
+    public class JaxCounterStrike: ISpellScript
     {
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        ObjAIBase Owner;
+        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
-            BuffType = BuffType.INTERNAL,
-            BuffAddType = BuffAddType.REPLACE_EXISTING,
-            MaxStacks = 1
+            TriggersSpellCasts = true,
         };
 
-
-        public IStatsModifier StatsModifier { get; private set; }
-
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
-            ((IObjAiBase)unit).SetSpell("JaxCounterStrikeAttack", 2, true);
+            Owner = owner;
         }
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+
+        public void OnSpellCast(Spell spell)
         {
-            if (((IObjAiBase)unit).Spells[2].SpellName == "JaxCounterStrikeAttack")
-            {
-                ((IObjAiBase)unit).SetSpell("JaxCounterStrike", 2, true);
-            }
+            var owner = spell.CastInfo.Owner;
+
+            AddBuff("JaxCounterStrikeAttack", 5f, 1, spell, Owner, Owner, false);
+
+            AddParticleTarget(owner, owner, "JaxDodger.troy", owner, 5f);
         }
 
-        public void OnUpdate(float diff)
-        {
-            //nothing!
-        }
     }
 }
