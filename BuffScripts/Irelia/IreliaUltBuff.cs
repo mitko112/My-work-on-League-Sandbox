@@ -1,15 +1,24 @@
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Enums;
-using GameServerCore.Scripting.CSharp;
+using System.Numerics;
 using LeagueSandbox.GameServer.API;
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects;
+
 
 namespace Buffs
 {
     internal class IreliaTranscendentBlades : IBuffGameScript
     {
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.INTERNAL,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
@@ -17,15 +26,15 @@ namespace Buffs
         };
         
 
-        public IStatsModifier StatsModifier { get; private set; }
+        public StatsModifier StatsModifier { get; private set; }
 
         int counter = 0;
-        IObjAiBase Unit;
-        IBuff Buff;
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        ObjAIBase Unit;
+        Buff Buff;
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             Buff = buff;
-            if (unit is IObjAiBase obj)
+            if (unit is ObjAIBase obj)
             {
                 Unit = obj;
                 obj.SetSpell("IreliaTranscendentBladesSpell", 3, true);
@@ -33,7 +42,7 @@ namespace Buffs
             }
         }
 
-        public void OnSpellCast(ISpell spell)
+        public void OnSpellCast(Spell spell)
         {
             counter++;
             if (counter >= 4 && (Unit).Spells[3].SpellName == "IreliaTranscendentBladesSpell")
@@ -42,7 +51,7 @@ namespace Buffs
                 Buff.DeactivateBuff();
             }
         }
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             ApiEventManager.OnSpellCast.RemoveListener(this);
         }
