@@ -1,21 +1,24 @@
-﻿using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using GameServerCore.Enums;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
-using GameServerCore.Enums;
-using LeagueSandbox.GameServer.API;
-using System.Collections.Generic;
-using GameServerCore.Domain.GameObjects.Spell.Sector;
-using GameServerCore.Scripting.CSharp;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 
 namespace Spells
 {
     public class NasusE : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
             TriggersSpellCasts = true,
             CastingBreaksStealth = true,
@@ -26,27 +29,18 @@ namespace Spells
 
         };
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
         }
-        IBuff thisBuff;
-        public ISpellSector DamageSector;
+        Buff thisBuff;
+        public SpellSector DamageSector;
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
-        {
-        }
+    
 
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
-        {
+       
 
-        }
-
-        public void OnSpellCast(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostCast(ISpell spell)
+        public void OnSpellPostCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner;
             var targetPos = GetPointFromUnit(owner, 650.0f);
@@ -72,17 +66,15 @@ namespace Spells
             var units = GetUnitsInRange(SpellPos, 650f, true);
             for (int i = 0; i < units.Count; i++)
             {
-                if (!(units[i].Team == owner.Team || units[i] is IBaseTurret || units[i] is IObjBuilding || units[i] is IInhibitor))
+                if (!(units[i].Team == owner.Team || units[i] is BaseTurret || units[i] is ObjBuilding || units[i] is Inhibitor))
                 {
                     units[i].TakeDamage(owner, initialdamage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
                 }
             }
         }
 
-        public void OnSpellChannel(ISpell spell)
-        {
-        }
-        public void TargetExecute(ISpell spell, IAttackableUnit target, ISpellMissile missile, ISpellSector sector)
+       
+        public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
         {
             var owner = spell.CastInfo.Owner;
             //var ap = spell.CastInfo.Owner.Stats.AbilityPower.Total * 0.6f;
@@ -92,14 +84,7 @@ namespace Spells
             AddBuff("NasusE", 1f, 1, spell, target, owner);
 
         }
-        public void OnSpellChannelCancel(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostChannel(ISpell spell)
-        {
-        }
-
+       
         public void OnUpdate(float diff)
         {
         }
