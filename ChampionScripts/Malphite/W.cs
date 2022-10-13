@@ -1,68 +1,71 @@
+using System.Numerics;
 using GameServerCore.Enums;
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
+using LeagueSandbox.GameServer.API;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
-using System.Numerics;
-using LeagueSandbox.GameServer.API;
-using System.Collections.Generic;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
 using GameServerCore.Scripting.CSharp;
-using GameServerCore.Domain.GameObjects.Spell.Sector;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
 
 namespace Spells
 {
     public class Obduracy : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
+        ObjAIBase Owner;
+        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
             TriggersSpellCasts = true,
-            NotSingleTargetSpell = true
-            // TODO
         };
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
-			ApiEventManager.OnLevelUpSpell.AddListener(this, spell, OnLevelUp, true);
+            Owner = owner;
+
+            if (owner is ObjAIBase obj)
+            {
+
+                ApiEventManager.OnLaunchAttack.AddListener(this, obj, TargetExecute, true);
+            }
+
         }
-		public void OnLevelUp (ISpell spell)
+        public void TargetExecute(Spell spell)
+
+
         {
-			var owner = spell.CastInfo.Owner;
-            AddBuff("ObduracyA", 250000.0f, 1, spell, owner, owner);
+
+            var owner = spell.CastInfo.Owner;
+
+            var AD = Owner.Stats.AttackDamage.Total * 0.3f * owner.GetSpell("Obduracy").CastInfo.SpellLevel;
+            float damage = AD;
+
+
+
+
+
+            var units = GetUnitsInRange(owner.Position, 200f, true);
+            for (int i = 0; i < units.Count; i++)
+            {
+                if (!(units[i].Team == owner.Team || units[i] is BaseTurret || units[i] is ObjBuilding || units[i] is Inhibitor))
+                {
+                    units[i].TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
+                    AddParticleTarget(owner, owner, "MalphiteCleaveHit.troy", owner, 1f);
+
+                }
+            }
         }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
+
+
+        public void OnSpellCast(Spell spell)
         {
+            var owner = spell.CastInfo.Owner;
+
+            AddBuff("MalphiteObduracyEffect", 5f, 1, spell, Owner, Owner, false);
+            AddParticleTarget(owner, owner, "Malphite_Enrage_glow.troy", owner, 5f);
         }
 
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
-        {
-            AddBuff("ObduracyBuff", 6.0f, 1, spell, owner, owner);
-			AddBuff("ObduracyAttack", 6.5f, 1, spell, owner, owner);
-        }
-
-        public void OnSpellCast(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostCast(ISpell spell)
-        {
-        }
-
-        public void OnSpellChannel(ISpell spell)
-        {
-        }
-
-        public void OnSpellChannelCancel(ISpell spell, ChannelingStopSource reason)
-        {
-        }
-
-        public void OnSpellPostChannel(ISpell spell)
-        {
-        }
-
-        public void OnUpdate(float diff)
-        {
+       
         }
     }
-}	
