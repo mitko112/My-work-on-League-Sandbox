@@ -1,38 +1,42 @@
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Enums;
 using System.Numerics;
-using System.Linq;
-using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.API;
-using LeagueSandbox.GameServer.GameObjects.Stats;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
-using GameServerCore.Domain;
 using LeagueSandbox.GameServer.Scripting.CSharp;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects;
+
 
 namespace Buffs
 {
     internal class NasusQ : IBuffGameScript
     {
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.COMBAT_ENCHANCER,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
         };
 
-        public IStatsModifier StatsModifier { get; private set; } = new StatsModifier();
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        IParticle pbuff;
-        IParticle pbuff2;
-        IBuff thisBuff;
-        IObjAiBase owner;
+        Particle pbuff;
+        Particle pbuff2;
+        Buff thisBuff;
+        ObjAIBase owner;
 
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             thisBuff = buff;
-            if (unit is IObjAiBase ai)
+            if (unit is ObjAIBase ai)
             {
-                var owner = ownerSpell.CastInfo.Owner as IChampion;
+                var owner = ownerSpell.CastInfo.Owner as Champion;
                 pbuff = AddParticleTarget(ownerSpell.CastInfo.Owner, ownerSpell.CastInfo.Owner, "Nasus_Base_Q_Buf.troy", unit, buff.Duration, 1, "BUFFBONE_CSTM_WEAPON_1");
                 //pbuff2 = AddParticleTarget(ownerSpell.CastInfo.Owner, ownerSpell.CastInfo.Owner, "Nasus_Base_Q_Wpn_trail.troy", unit, buff.Duration, 1, "BUFFBONE_CSTM_WEAPON_1");
                 StatsModifier.Range.FlatBonus = 50.0f;
@@ -44,9 +48,9 @@ namespace Buffs
             }
         }
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            var owner = ownerSpell.CastInfo.Owner as IChampion;
+            var owner = ownerSpell.CastInfo.Owner as Champion;
             RemoveParticle(pbuff);
             RemoveParticle(pbuff2);
             RemoveBuff(thisBuff);
@@ -58,19 +62,19 @@ namespace Buffs
             {
                 ApiEventManager.OnLaunchAttack.RemoveListener(this);
             }
-            if (unit is IObjAiBase ai)
+            if (unit is ObjAIBase ai)
             {
                 SealSpellSlot(ai, SpellSlotType.SpellSlots, 0, SpellbookType.SPELLBOOK_CHAMPION, false);
             }
         }
 
-        public void OnLaunchAttack(ISpell spell)
+        public void OnLaunchAttack(Spell spell)
         {
 
             if (thisBuff != null && thisBuff.StackCount != 0 && !thisBuff.Elapsed())
             {
                 spell.CastInfo.Owner.RemoveBuff(thisBuff);
-                var owner = spell.CastInfo.Owner as IChampion;
+                var owner = spell.CastInfo.Owner as Champion;
                 spell.CastInfo.Owner.SkipNextAutoAttack();
                 SpellCast(spell.CastInfo.Owner, 0, SpellSlotType.ExtraSlots, false, spell.CastInfo.Owner.TargetUnit, Vector2.Zero);
                 SealSpellSlot(owner, SpellSlotType.SpellSlots, 0, SpellbookType.SPELLBOOK_CHAMPION, false);
