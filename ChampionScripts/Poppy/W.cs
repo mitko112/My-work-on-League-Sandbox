@@ -1,22 +1,24 @@
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using GameServerCore.Enums;
+using GameServerCore.Scripting.CSharp;
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
-using GameServerCore.Enums;
-using LeagueSandbox.GameServer.API;
-using System.Collections.Generic;
-using GameServerCore.Domain.GameObjects.Spell.Sector;
-using GameServerCore.Scripting.CSharp;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
-using GameServerCore.Domain;
-
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 namespace Spells
 {
     public class PoppyParagonOfDemacia : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
             TriggersSpellCasts = true,
             CastingBreaksStealth = true,
@@ -26,10 +28,10 @@ namespace Spells
 
 
         };
-        IObjAiBase daowner;
-        ISpell daspell;
+        ObjAIBase daowner;
+        Spell daspell;
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
             daowner = owner;
             daspell = spell;
@@ -37,31 +39,22 @@ namespace Spells
                 ApiEventManager.OnHitUnit.AddListener(this, owner, GivePoppySomething, false);
             }
         }
-        public void GivePoppySomething(IDamageData damageData)
+        public void GivePoppySomething(DamageData damageData)
         {
             AddBuff("PoppyParagonManager", 5f, 1, daspell, daowner, daowner, false);
         }
 
     
 
-        public ISpellSector DamageSector;
-
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
-        {
-        }
-
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
-        {
-            
-        }
+        public SpellSector DamageSector;
 
         
-        public void AddPoppyWPassive(ISpell spell)
+        public void AddPoppyWPassive(Spell spell)
         {
             AddBuff("PoppyParagonManager", 5f, 1, spell, daowner, daowner, false);
         }
 
-        public void OnSpellCast(ISpell spell)
+        public void OnSpellCast(Spell spell)
         {
             ApiEventManager.OnHitUnit.RemoveListener(this, daowner);
             var owner = spell.CastInfo.Owner;
@@ -74,28 +67,12 @@ namespace Spells
             }
         }
 
-        public void OnSpellPostCast(ISpell spell)
+        public void OnSpellPostCast(Spell spell)
         {
             ApiEventManager.OnHitUnit.AddListener(this, daowner, GivePoppySomething, false);
 
         }
 
-        public void OnSpellChannel(ISpell spell)
-        {
-        }
-        public void TargetExecute(ISpell spell, IAttackableUnit target, ISpellMissile missile, ISpellSector sector)
-        {
-        }
-        public void OnSpellChannelCancel(ISpell spell, ChannelingStopSource reason)
-        {
-        }
-
-        public void OnSpellPostChannel(ISpell spell)
-        {
-        }
-
-        public void OnUpdate(float diff)
-        {
-        }
+        
     }
 }
