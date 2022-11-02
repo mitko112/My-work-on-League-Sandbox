@@ -1,27 +1,29 @@
 using GameServerCore.Enums;
-using GameServerCore.Domain.GameObjects;
-using LeagueSandbox.GameServer.GameObjects.Stats;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Scripting.CSharp;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
 
 namespace Buffs
 {
     internal class Size : IBuffGameScript
     {
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.COMBAT_ENCHANCER,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
             MaxStacks = 1
         };
 
-        public IStatsModifier StatsModifier { get; private set; } = new StatsModifier();
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
         
 
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             
             StatsModifier.Size.PercentBonus += 0.75f; 
@@ -29,7 +31,7 @@ namespace Buffs
             
         }
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             
         }

@@ -1,25 +1,28 @@
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
 using GameServerCore.Enums;
-using GameServerCore.Scripting.CSharp;
-using LeagueSandbox.GameServer.GameObjects.Stats;
-using LeagueSandbox.GameServer.Scripting.CSharp;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
-
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.API;
+using GameServerLib.GameObjects.AttackableUnits;
 
 namespace Buffs
 {
     internal class XinEDebuff : IBuffGameScript
     {
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.SLOW,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
             MaxStacks = 1
         };
-        public IStatsModifier StatsModifier { get; private set; } = new StatsModifier();
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             StatsModifier.MoveSpeed.PercentBonus -= 0.25f;
             
@@ -28,13 +31,5 @@ namespace Buffs
             AddParticleTarget(ownerSpell.CastInfo.Owner, null, "Global_Slow.troy", unit, buff.Duration);
         }
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
-        {
-        }
-
-        public void OnUpdate(float diff)
-        {
-
-        }
     }
 }

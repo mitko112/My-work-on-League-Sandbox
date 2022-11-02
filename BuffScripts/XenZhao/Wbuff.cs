@@ -1,27 +1,32 @@
 using GameServerCore.Enums;
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Scripting.CSharp;
-using LeagueSandbox.GameServer.API;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
-using System.Collections.Generic;
+using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.API;
+using GameServerLib.GameObjects.AttackableUnits;
+using System.Numerics;
+
 
 namespace Buffs
 {
     internal class XenZhaoBattleCryPassive : IBuffGameScript
     {
-        public IBuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.DAMAGE,
-            BuffAddType = BuffAddType.REPLACE_EXISTING,
+            BuffAddType = BuffAddType.STACKS_AND_RENEWS,
             MaxStacks = 3
         };
-        public IStatsModifier StatsModifier { get; private set; }
+        public StatsModifier StatsModifier { get; private set; }
 
-        IParticle p;
-        IAttackableUnit Unit;
-        public void OnActivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        Particle p;
+        AttackableUnit Unit;
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             Unit = unit;
             switch (buff.StackCount)
@@ -39,16 +44,16 @@ namespace Buffs
                     break;
             }
         }
-        public void Heal(ISpell spell)
+        public void Heal(Spell spell)
         {
             var owner = spell.CastInfo.Owner;
-            float heal = 26*(owner.GetSpell(1).CastInfo.SpellLevel - 1);
+            float heal = 26*(owner.GetSpell("XenZhaoBattleCry").CastInfo.SpellLevel - 1);
             float ap = owner.Stats.AbilityPower.Total * 0.7f;
             owner.Stats.CurrentHealth += heal+ap;
             
         }
 
-        public void OnDeactivate(IAttackableUnit unit, IBuff buff, ISpell ownerSpell)
+        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             RemoveParticle(p);
         }
