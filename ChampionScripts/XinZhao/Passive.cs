@@ -1,23 +1,23 @@
-using GameServerCore.Domain.GameObjects;
-using LeagueSandbox.GameServer.Scripting.CSharp;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Domain.GameObjects.Spell.Missile;
+
 using System.Numerics;
-using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.API;
-using GameServerCore.Domain;
-using GameServerLib.GameObjects.AttackableUnits;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 
 
 namespace CharScripts
 {
      
-    public class CharScriptXinZhao : ICharScript
+    public class CharScriptXinzhao : ICharScript
 
     {
-        ISpell Spell;
-        public void OnActivate(IObjAiBase owner, ISpell spell)
+        Spell Spell;
+        public void OnActivate(ObjAIBase owner, Spell spell)
 
         {
 
@@ -28,7 +28,7 @@ namespace CharScripts
                 ApiEventManager.OnHitUnit.AddListener(this, owner, OnHitUnit, false);
             }
         }
-        public void OnHitUnit(IDamageData damageData)
+        public void OnHitUnit(DamageData damageData)
 
         
         {
@@ -41,7 +41,7 @@ namespace CharScripts
 
 
  
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
+        public void OnDeactivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnHitUnit.RemoveListener(this);
         }

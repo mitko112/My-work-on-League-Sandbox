@@ -1,41 +1,35 @@
-using static LeagueSandbox.GameServer.API.ApiFunctionManager;
-using GameServerCore.Domain.GameObjects.Spell;
-using GameServerCore.Scripting.CSharp;
-using GameServerCore.Enums;
-using GameServerCore.Domain.GameObjects;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
-
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using GameServerCore.Scripting.CSharp;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
+using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
 namespace Spells
 {
     public class DetonatingShot : ISpellScript
     {
-        IAttackableUnit Target;
-        public ISpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
+        AttackableUnit Target;
+        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
             TriggersSpellCasts = true,
         
             // TODO
         };
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
-        {
-        }
-
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
-        {
-        }
-
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
+       
+        public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
             Target = target;
         }
 
-        public void OnSpellCast(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostCast(ISpell spell)
+        public void OnSpellPostCast(Spell spell)
         {
 
             var owner = spell.CastInfo.Owner;
@@ -43,17 +37,7 @@ namespace Spells
               AddParticleTarget(owner, Target, "DetonatingShot_buf.troy", Target, 5f, 1f);
         }
 
-        public void OnSpellChannel(ISpell spell)
-        {
-        }
-
-        public void OnSpellChannelCancel(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostChannel(ISpell spell)
-        {
-        }
+       
 
         public void OnUpdate(float diff)
         {

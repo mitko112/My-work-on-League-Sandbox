@@ -14,7 +14,7 @@ using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBui
 
 namespace Spells
 {
-    public class RocketJump : ISpellScript
+    public class MockingShout : ISpellScript
     {
         public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
@@ -22,28 +22,28 @@ namespace Spells
             // TODO
         };
 
-        
+      
 
         public void OnSpellPostCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner as Champion;
-            var ap = spell.CastInfo.Owner.Stats.AbilityPower.Total * 0.8f;
-            var damage = 70*spell.CastInfo.SpellLevel  + ap;
-            var coords = new Vector2(spell.CastInfo.TargetPosition.X, spell.CastInfo.TargetPosition.Z);
-            ForceMovement(owner, "Spell3", coords, 2200, 0, 0, 0);
-            var units = GetUnitsInRange(coords, 350f, true);
+
+
+
+
+
+            var units = GetUnitsInRange(owner.Position, 500f, true);
             for (int i = 0; i < units.Count; i++)
             {
                 if (!(units[i].Team == owner.Team || units[i] is BaseTurret || units[i] is ObjBuilding || units[i] is Inhibitor))
                 {
-                    units[i].TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
-                    AddParticleTarget(owner, units[i], "tristana_rocketJump_unit_tar.troy", units[i], 1f);
-                    AddParticleTarget(owner, owner, "RocketJump_cas.troy", owner, 1f);
-                    
+                    AddBuff("MockingShoutSlow", 4f, 1, spell, units[i], owner);
+
+                    AddParticleTarget(owner, units[i], "Chicken_buf.troy", units[i], 4f);
                 }
             }
-            
         }
-
+    
+        }
     }
-}
+
