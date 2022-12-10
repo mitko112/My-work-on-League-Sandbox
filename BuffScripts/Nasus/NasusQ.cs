@@ -1,3 +1,4 @@
+
 using System.Numerics;
 using LeagueSandbox.GameServer.API;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
@@ -12,77 +13,73 @@ using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBui
 using GameServerCore.Enums;
 using LeagueSandbox.GameServer.GameObjects.StatsNS;
 using LeagueSandbox.GameServer.GameObjects;
-
+using LeagueSandbox.GameServer.GameObjects.Other;
 
 namespace Buffs
 {
+
     internal class NasusQ : IBuffGameScript
     {
+
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
-            BuffType = BuffType.COMBAT_ENCHANCER,
+            BuffType = BuffType.DAMAGE,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
+            MaxStacks = 1
         };
+
 
         public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        Particle pbuff;
-        Particle pbuff2;
         Buff thisBuff;
-        ObjAIBase owner;
+        ObjAIBase Unit;
+        Spell Spell;
+        
 
         public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             thisBuff = buff;
             if (unit is ObjAIBase ai)
             {
-                var owner = ownerSpell.CastInfo.Owner as Champion;
-                pbuff = AddParticleTarget(ownerSpell.CastInfo.Owner, ownerSpell.CastInfo.Owner, "Nasus_Base_Q_Buf.troy", unit, buff.Duration, 1, "BUFFBONE_CSTM_WEAPON_1");
-                //pbuff2 = AddParticleTarget(ownerSpell.CastInfo.Owner, ownerSpell.CastInfo.Owner, "Nasus_Base_Q_Wpn_trail.troy", unit, buff.Duration, 1, "BUFFBONE_CSTM_WEAPON_1");
-                StatsModifier.Range.FlatBonus = 50.0f;
-                unit.AddStatModifier(StatsModifier);
-                //SetAnimStates(owner, new Dictionary<string, string> { { "Attack1", "Spell1" } });
-                SealSpellSlot(owner, SpellSlotType.SpellSlots, 0, SpellbookType.SPELLBOOK_CHAMPION, true);
-                ApiEventManager.OnLaunchAttack.AddListener(this, owner, OnLaunchAttack, false);
-                owner.CancelAutoAttack(true);
+                Unit = ai;
+
+                ApiEventManager.OnHitUnit.AddListener(this, ai, TargetExecute, true);
+
+                ai.SkipNextAutoAttack();
+
+
             }
+
         }
 
         public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            var owner = ownerSpell.CastInfo.Owner as Champion;
-            RemoveParticle(pbuff);
-            RemoveParticle(pbuff2);
-            RemoveBuff(thisBuff);
-            CreateTimer(0.5f, () =>
-            {
-                //SetAnimStates(owner, new Dictionary<string, string> { { "Spell1", "Attack1" } });
-            });
-            if (buff.TimeElapsed >= buff.Duration)
-            {
-                ApiEventManager.OnLaunchAttack.RemoveListener(this);
-            }
-            if (unit is ObjAIBase ai)
-            {
-                SealSpellSlot(ai, SpellSlotType.SpellSlots, 0, SpellbookType.SPELLBOOK_CHAMPION, false);
-            }
+            Spell = ownerSpell;
+
         }
-
-        public void OnLaunchAttack(Spell spell)
+        public void TargetExecute(DamageData damageData)
         {
-
-            if (thisBuff != null && thisBuff.StackCount != 0 && !thisBuff.Elapsed())
+            if (!thisBuff.Elapsed() && thisBuff != null && Unit != null)
             {
-                spell.CastInfo.Owner.RemoveBuff(thisBuff);
-                var owner = spell.CastInfo.Owner as Champion;
-                spell.CastInfo.Owner.SkipNextAutoAttack();
-                SpellCast(spell.CastInfo.Owner, 0, SpellSlotType.ExtraSlots, false, spell.CastInfo.Owner.TargetUnit, Vector2.Zero);
-                SealSpellSlot(owner, SpellSlotType.SpellSlots, 0, SpellbookType.SPELLBOOK_CHAMPION, false);
+
+                //float stacks = Unit.GetBuffWithName("NasusQStacks").StackCount;
+                float damage = 30; //+ stacks;
+                
+                var target = damageData.Target;
+                target.TakeDamage(Unit, damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_ATTACK, false);
+                
+                if (target.IsDead)
+                {
+                    AddBuff("NasusQStacks", 1, 1, Spell, Unit, Unit, true);
+                    
+                }
+
                 thisBuff.DeactivateBuff();
             }
         }
         public void OnUpdate(float diff)
         {
+
         }
     }
 }

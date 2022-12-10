@@ -27,13 +27,7 @@ namespace Buffs
 
         public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        Buff thisBuff;
-        ObjAIBase Unit;
-        Particle p;
-        Particle p2;
-        ObjAIBase Owner;
-        AttackableUnit AtOwner;
-        public static float Qstacks = 0f;
-       
+        
+
         }
     }
