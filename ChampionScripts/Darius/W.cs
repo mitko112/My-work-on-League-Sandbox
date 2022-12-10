@@ -22,7 +22,7 @@ namespace Spells
         
         public void OnSpellCast(Spell spell)
         {
-            var owner = spell.CastInfo.Owner;
+            
             
        
             

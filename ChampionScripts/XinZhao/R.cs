@@ -1,52 +1,76 @@
-using System.Numerics;
-using LeagueSandbox.GameServer.API;
+
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.GameObjects.SpellNS;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
-using GameServerLib.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
 using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
+using LeagueSandbox.GameServer.API;
 
 namespace Spells
 {
     public class XenZhaoParry : ISpellScript
     {
-        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
+        Spell Spell;
+        public byte HitChampion;
+        public SpellScriptMetadata ScriptMetadata => new()
         {
+            IsDamagingSpell = true,
             TriggersSpellCasts = true
-            // TODO
         };
 
-
-        public void OnSpellPostCast(Spell spell)
+        public void OnActivate(ObjAIBase owner, Spell spell)
         {
-            var owner = spell.CastInfo.Owner as Champion;
-            
-            var ad = spell.CastInfo.Owner.Stats.AttackDamage.FlatBonus*2f;
-            
-            var damage = 75*spell.CastInfo.SpellLevel + ad;
-            var trueCoords = GetPointFromUnit(owner, 500f);
-
-
-
-
-            var units = GetUnitsInRange(owner.Position, 187f, true);
-            for (int i = 0; i < units.Count; i++)
-            {
-                if (!(units[i].Team == owner.Team || units[i] is BaseTurret || units[i] is ObjBuilding || units[i] is Inhibitor))
-                {
-                    units[i].TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
-                     ForceMovement(units[i], "RUN", trueCoords, 2200, 0, 0, 0);
-                }
-            }
-
+            ApiEventManager.OnSpellHit.AddListener(this, spell, OnSpellHit, false);
         }
 
-        
+        public void OnSpellPostCast(Spell spell)
+
+
+
+        {
+            Spell = spell;
+            HitChampion = 0;
+            Spell.CreateSpellSector(new SectorParameters
+            {
+                Length = 450f,
+                SingleTick = true,
+                Type = SectorType.Area,
+                OverrideFlags = SpellDataFlags.AffectEnemies | SpellDataFlags.AffectNeutral | SpellDataFlags.AffectMinions | SpellDataFlags.AffectHeroes
+            });
+        }
+        public void OnSpellHit(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
+        {
+            var owner = Spell.CastInfo.Owner;
+            float AD = owner.Stats.AttackDamage.FlatBonus;
+            float Damage = 75 * Spell.CastInfo.SpellLevel + AD;
+            if (!(target.Team == owner.Team || target is BaseTurret || target is ObjBuilding))
+            {
+                FaceDirection(owner.Position, target);
+                Damage += target.Stats.CurrentHealth * 0.15f;
+                if ((target is Monster || target is Minion) && Damage > 600f)
+                {
+                    Damage = 600f;
+                }
+                AddParticleTarget(owner, target, "xenZiou_utl_tar.troy", target, 1f, 1f);
+                AddParticleTarget(owner, target, "xenZiou_utl_tar_02.troy", target, 1f, 1f);
+                AddParticleTarget(owner, target, "xenZiou_utl_tar_03.troy", target, 1f, 1f);
+
+                target.TakeDamage(owner, Damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
+                    ForceMovement(target, null, GetPointFromUnit(target, -(450.0f)), 1800, 0, 80, 0);
+                }
+                if (target is Champion)
+                {
+                    HitChampion += 1;
+                    AddBuff("XenZhaoParry", 6.0f, 1, Spell, owner, owner);
+                }
+            }
+        }
     }
 
-}
+    

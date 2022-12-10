@@ -24,9 +24,16 @@ namespace Spells
 
         public void OnActivate(ObjAIBase owner, Spell spell)
         {
+            ApiEventManager.OnLevelUpSpell.AddListener(owner, spell, OnLevelUp, false);
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
+
         }
 
+        public void OnLevelUp(Spell spell)
+        {
+            var owner = spell.CastInfo.Owner;
+            AddBuff("DariusPassiveArmorPen", 1, 1, spell, owner, owner, true);
+        }
         public void OnSpellPostCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner;

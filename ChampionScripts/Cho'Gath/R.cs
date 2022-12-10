@@ -53,8 +53,10 @@ namespace Spells
                    Target.TakeDamage(owner, damageMM, DamageType.DAMAGE_TYPE_TRUE, DamageSource.DAMAGE_SOURCE_SPELL, false);
                 }
             }
-            AddBuff("Feast", 1f, 1, spell, owner, owner, true);
-
+            if (Target.IsDead)
+            {
+                AddBuff("Feast", 1f, 1, spell, owner, owner, true);
+            }
             AddParticleTarget(owner, Target, "feast_tar.troy", Target, 1f, 1f);
         }
 

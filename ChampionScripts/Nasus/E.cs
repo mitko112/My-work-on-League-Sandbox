@@ -1,4 +1,4 @@
-using GameServerCore.Enums;
+﻿using GameServerCore.Enums;
 using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.API;
 using LeagueSandbox.GameServer.GameObjects;
@@ -63,7 +63,7 @@ namespace Spells
                 Lifetime = 5.0f
             });
 
-            var units = GetUnitsInRange(SpellPos, 650f, true);
+            var units = GetUnitsInRange(spellpos, 650f, true);
             for (int i = 0; i < units.Count; i++)
             {
                 if (!(units[i].Team == owner.Team || units[i] is BaseTurret || units[i] is ObjBuilding || units[i] is Inhibitor))

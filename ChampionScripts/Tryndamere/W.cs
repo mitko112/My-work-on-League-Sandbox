@@ -32,7 +32,7 @@ namespace Spells
 
 
 
-            var units = GetUnitsInRange(owner.Position, 500f, true);
+            var units = GetChampionsInRange(owner.Position, 500f, true);
             for (int i = 0; i < units.Count; i++)
             {
                 if (!(units[i].Team == owner.Team || units[i] is BaseTurret || units[i] is ObjBuilding || units[i] is Inhibitor))

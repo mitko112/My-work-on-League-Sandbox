@@ -62,8 +62,11 @@ namespace Spells
             var owner = spell.CastInfo.Owner;
             var ap = owner.Stats.AbilityPower.Total * 0.6f;
             var damage = 35 + spell.CastInfo.SpellLevel * 45 + ap;
-            
+            var trueCoords = GetPointFromUnit(owner, 180f);
+
             target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
+            ForceMovement(target, "RUN", trueCoords, 2200, 0, 0, 0);
+
             s.SetToRemove();
             spell.CastInfo.Owner.StopMovement();
              

@@ -1,11 +1,9 @@
 using GameServerCore.Enums;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
-using System.Numerics;
 using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
 using LeagueSandbox.GameServer.GameObjects.SpellNS;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
 
@@ -21,19 +19,10 @@ namespace Spells
 
         public void OnActivate(ObjAIBase owner, Spell spell)
         {
-        }
+            AddBuff("AmumuEPassive", 1, 1, spell, owner, owner, true);
 
-        public void OnDeactivate(ObjAIBase owner, Spell spell)
-        {
-        }
 
-        public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
-        {
-        }
-
-        public void OnSpellCast(Spell spell)
-        {
-        }
+            }
 
         public void OnSpellPostCast(Spell spell)
         {

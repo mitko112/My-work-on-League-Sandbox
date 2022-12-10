@@ -33,12 +33,15 @@ namespace Spells
             toggled = !toggled;
             if (toggled == false)
             {
-                RemoveBuff(owner, "ChogathSpikes");
+                RemoveBuff(owner, "VorpalSpikes");
+                
+
                 LogDebug("toggled off");
             }
             if (toggled == true)
             {
-                AddBuff("ChogathSpikes", 15f, 1, spell, target, owner);
+                AddBuff("VorpalSpikes", 1, 1, spell, target, owner, true);
+                
                 LogDebug("toggled on");
             }
         }

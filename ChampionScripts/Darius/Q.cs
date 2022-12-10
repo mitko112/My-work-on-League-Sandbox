@@ -10,6 +10,7 @@ using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
 using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
+using static LeaguePackets.Game.Common.CastInfo;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 namespace Spells
@@ -26,14 +27,15 @@ namespace Spells
         {
             var owner = spell.CastInfo.Owner as Champion;
             var ad = spell.CastInfo.Owner.Stats.AttackDamage.FlatBonus * 0.5f;
-            var damage = 70*spell.CastInfo.SpellLevel  + ad;
+            var damage = 100 * spell.CastInfo.SpellLevel + ad;
+            var damageclose = 70 * spell.CastInfo.SpellLevel + ad;
 
-                    AddParticle(owner, null, "darius_Base_Q_tar.troy", owner.Position, direction: owner.Direction);
-                    AddParticle(owner, null, "darius_Base_Q_aoe_cast.troy", owner.Position, direction: owner.Direction);
-                    AddParticle(owner, null, "darius_Base_Q_aoe_cast_mist", owner.Position, direction: owner.Direction);
-                    
-                    AddParticle(owner, null, "darius_Base_Q_tar_inner.troy", owner.Position, direction: owner.Direction);
-                    PlayAnimation(owner, "Spell1", 0.7f);
+            AddParticle(owner, null, "darius_Base_Q_tar.troy", owner.Position, direction: owner.Direction);
+            AddParticle(owner, null, "darius_Base_Q_aoe_cast.troy", owner.Position, direction: owner.Direction);
+            AddParticle(owner, null, "darius_Base_Q_aoe_cast_mist", owner.Position, direction: owner.Direction);
+
+            AddParticle(owner, null, "darius_Base_Q_tar_inner.troy", owner.Position, direction: owner.Direction);
+            PlayAnimation(owner, "Spell1", 0.7f);
 
 
             var units = GetUnitsInRange(owner.Position, 425f, true);
@@ -42,13 +44,19 @@ namespace Spells
                 if (!(units[i].Team == owner.Team || units[i] is BaseTurret || units[i] is ObjBuilding || units[i] is Inhibitor))
                 {
                     units[i].TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
-
                     AddParticleTarget(owner, units[i], "darius_Base_Q_impact_spray.troy", units[i], 1f);
+                    if (System.Math.Abs(Vector2.Distance(units[i].Position, owner.Position)) > 270)
+                    {
+                        units[i].TakeDamage(owner, damageclose, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
+
+                        
+                    }
                 }
+
             }
 
         }
 
-        }
-    
+    }
+
 }
