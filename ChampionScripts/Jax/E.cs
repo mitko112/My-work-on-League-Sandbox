@@ -1,3 +1,4 @@
+using Buffs;
 using GameServerCore.Enums;
 using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.API;
@@ -33,9 +34,16 @@ namespace Spells
         {
             var owner = spell.CastInfo.Owner;
 
-            AddBuff("JaxCounterStrikeAttack", 5f, 1, spell, Owner, Owner, false);
+            AddBuff("JaxCounterStrikeAttack", 2f, 1, spell, Owner, Owner, false);
+            AddBuff("JaxEDodge", 2f, 1, spell, Owner, Owner, false); 
+            AddBuff("JaxESelfcast", 2f, 1, spell, Owner, Owner, false);
 
-            AddParticleTarget(owner, owner, "JaxDodger.troy", owner, 5f);
+
+            AddParticleTarget(owner, owner, "JaxDodger.troy", owner, 2f);
+
+            
+
+            
         }
 
     }

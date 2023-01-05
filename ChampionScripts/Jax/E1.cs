@@ -23,13 +23,14 @@ namespace Spells
             // TODO
         };
         public void OnSpellPostCast(Spell spell)
+
         {
             var owner = spell.CastInfo.Owner as Champion;
             var AD = spell.CastInfo.Owner.Stats.AttackDamage.FlatBonus * 0.5f;
             var damage = 50 + spell.CastInfo.SpellLevel + AD;
 
 
-
+            
 
             var units = GetUnitsInRange(owner.Position, 400f, true);
             for (int i = 0; i < units.Count; i++)
@@ -42,6 +43,26 @@ namespace Spells
                     AddBuff("Stun", 1.5f, 1, spell, units[i], owner);
 
                     spell.SetCooldown(14f, false);
+
+                    if (owner.HasBuff("JaxEDodge"))
+                    {
+
+                        RemoveBuff(owner, "JaxEDodge");
+                        
+                    }
+
+                    if (owner.HasBuff("JaxESelfcast"))
+                    {
+
+                        RemoveBuff(owner, "JaxESelfcast");
+
+                    }
+
+
+
+
+
+
 
 
                 }

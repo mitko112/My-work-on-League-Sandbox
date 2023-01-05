@@ -11,39 +11,65 @@ using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 using LeagueSandbox.GameServer.API;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using System.Collections.Generic;
 
 namespace Spells
 {
     public class RocketJump : ISpellScript
     {
-        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
+        public  SpellScriptMetadata ScriptMetadata { get; } = new()
         {
-            TriggersSpellCasts = true
-            // TODO
+            CastingBreaksStealth = true,
+            DoesntBreakShields = true,
+            TriggersSpellCasts = true,
+            IsDamagingSpell = true,
+            NotSingleTargetSpell = true
         };
 
-        
-
-        public void OnSpellPostCast(Spell spell)
+        Spell Spell;
+        public  void OnSpellPostCast(Spell spell)
         {
-            var owner = spell.CastInfo.Owner as Champion;
-            var ap = spell.CastInfo.Owner.Stats.AbilityPower.Total * 0.8f;
-            var damage = 70*spell.CastInfo.SpellLevel  + ap;
-            var coords = new Vector2(spell.CastInfo.TargetPosition.X, spell.CastInfo.TargetPosition.Z);
-            ForceMovement(owner, "Spell3", coords, 2200, 0, 0, 0);
-            var units = GetUnitsInRange(coords, 350f, true);
-            for (int i = 0; i < units.Count; i++)
+            Spell = spell;
+            var owner = spell.CastInfo.Owner;
+            PlayAnimation(owner, "spell2");
+            SetStatus(owner, StatusFlags.Ghosted, true);
+            var SpellPos = new Vector2(spell.CastInfo.TargetPosition.X, spell.CastInfo.TargetPosition.Z);
+            float Dist = Vector2.Distance(owner.Position, SpellPos);
+            if (Dist > spell.SpellData.CastRangeDisplayOverride)
             {
-                if (!(units[i].Team == owner.Team || units[i] is BaseTurret || units[i] is ObjBuilding || units[i] is Inhibitor))
-                {
-                    units[i].TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
-                    AddParticleTarget(owner, units[i], "tristana_rocketJump_unit_tar.troy", units[i], 1f);
-                    AddParticleTarget(owner, owner, "RocketJump_cas.troy", owner, 1f);
-                    
-                }
+                Dist = spell.SpellData.CastRangeDisplayOverride;
+                SpellPos = GetPointFromUnit(owner, spell.SpellData.CastRangeDisplayOverride);
             }
-            
+            FaceDirection(SpellPos, owner, true);
+            ForceMovement(owner, null, SpellPos, Dist * 1.22f, 0, Dist * 0.05f, 0);
+            AddParticlePos(owner, "tristana_rocketJump_cas", owner.Position, owner.Position);
+            AddParticleTarget(owner, owner, "tristana_rocketJump_cas_sparks", owner); 
+            ApiEventManager.OnMoveEnd.AddListener(this, owner, OnMoveEnd, true);
+            ApiEventManager.OnMoveSuccess.AddListener(this, owner, OnMoveSuccess, true);
         }
+        public void OnMoveSuccess(AttackableUnit unit)
+        {
 
+            var owner = Spell.CastInfo.Owner; 
+            owner.SetDashingState(false);
+            SetStatus(owner, StatusFlags.Ghosted, false);
+            PlayAnimation(owner, "spell3_landing", 0.2f);
+            StopAnimation(owner, "spell3", true, true, true);
+            AddParticlePos(owner, "tristana_rocketJump_land", owner.Position, owner.Position);
+            float Damage = 25 + 45 * Spell.CastInfo.SpellLevel + owner.Stats.AbilityPower.Total * 0.8f;
+            List<AttackableUnit> Units = GetUnitsInRange(owner.Position, 270, true);
+            Units.RemoveAll(x => x is BaseTurret || x is ObjBuilding);
+            foreach (AttackableUnit Unit in Units)
+            {
+                AddParticleTarget(owner, Unit, "tristana_rocketJump_unit_tar",Unit, 1f,  1f);
+                AddBuff("RocketJumpSlow", 0.5f * (1 + Spell.CastInfo.SpellLevel), 1, Spell, Unit, owner, false);
+                Unit.TakeDamage(owner, Damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
+            }
+        }
+        public void OnMoveEnd(AttackableUnit owner)
+        {
+            SetStatus(owner, StatusFlags.Ghosted, false);
+            StopAnimation(owner, "spell3", true, true, true);
+        }
     }
 }

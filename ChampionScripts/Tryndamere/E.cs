@@ -38,6 +38,9 @@ namespace Spells
         public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
             FaceDirection(end, owner);
+            var trueCoords = GetPointFromUnit(owner, 750f);
+            ForceMovement(owner, "Spell3", trueCoords, 1200, 0, 0, 0);
+
         }
 
         public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
@@ -45,8 +48,7 @@ namespace Spells
             var owner = spell.CastInfo.Owner;
             var Adratio = owner.Stats.AttackDamage.FlatBonus * 0.9f;
             var damage = 40*(spell.CastInfo.SpellLevel)   + Adratio ;
-            var trueCoords = GetPointFromUnit(owner, 750f);
-            ForceMovement(owner, "Spell3", trueCoords, 1200, 0, 0, 0);
+            
             var units = GetUnitsInRange(owner.Position, 750f, true);
             for (int i = 0; i < units.Count; i++)
             {

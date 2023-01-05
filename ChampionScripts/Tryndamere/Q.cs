@@ -27,6 +27,7 @@ namespace Spells
         public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
             Target = target;
+            
         }
 
      
@@ -35,13 +36,31 @@ namespace Spells
         {
             var owner = spell.CastInfo.Owner;
             var APratio = owner.Stats.AbilityPower.Total * 0.3f;
+           
+            var APRatiofury = owner.Stats.AbilityPower.Total * 0.012f;
+             var fury = owner.GetBuffWithName("BattleFury").StackCount;
+             var total = fury * 0.5f * APRatiofury;
             
-            float Heal = 30*spell.CastInfo.SpellLevel  + APratio ;
+                
+                float Heal = 30 * spell.CastInfo.SpellLevel + APratio + total;
+                owner.Stats.CurrentHealth += Heal;
+
+                
+                
 
             
-                owner.Stats.CurrentHealth += Heal;
-                
+            
+
                 AddParticleTarget(owner, owner, "Global_Heal.troy", owner, 1f);
+
+            if (owner.HasBuff("BattleFury"))
+                {
+
+                RemoveBuff(owner,"BattleFury");
+
+                }
+            
+
             
         }
         

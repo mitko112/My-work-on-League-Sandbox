@@ -23,7 +23,12 @@ namespace Spells
             // TODO
         };
 
-        
+
+        public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
+        {
+            
+            AddBuff("BattleFury", 50, 50, spell, owner, owner, true);
+        }
 
         public void OnSpellPostCast(Spell spell)
         {
@@ -31,8 +36,8 @@ namespace Spells
 
 
             AddBuff("UndyingRage", 5f, 1, spell, owner, owner);
-
-
+            
+            
         }
     
     }
