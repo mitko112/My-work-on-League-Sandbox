@@ -12,36 +12,32 @@ using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBui
 using GameServerCore.Enums;
 using LeagueSandbox.GameServer.GameObjects.StatsNS;
 using LeagueSandbox.GameServer.GameObjects;
-
+using System.Buffers;
 
 namespace Buffs
 {
-    internal class CurseoftheSadMummyCastEffects : IBuffGameScript
+    internal class JaxESelfcast : IBuffGameScript
     {
+        Vector2 spellpos;
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
-            BuffType = BuffType.SLOW,
+            BuffType = BuffType.INTERNAL,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
             MaxStacks = 1
         };
 
-       
-
+        Spell Spell;
         public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
-        {
-            SetStatus(unit, StatusFlags.CanMove, false);
-            SetStatus(unit, StatusFlags.CanAttack, false);
-
-
-            AddParticleTarget(ownerSpell.CastInfo.Owner, null, "Global_Slow.troy", unit, buff.Duration);
-        }
 
         public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
+            
         {
-            SetStatus(unit, StatusFlags.CanMove, true);
-            SetStatus(unit, StatusFlags.CanAttack, true);
+            Spell = ownerSpell;
+            var owner = Spell.CastInfo.Owner;
+            SpellCast(owner, 3, SpellSlotType.ExtraSlots, spellpos, spellpos, false, Vector2.Zero);
+
+
+        }
         }
     }
-}

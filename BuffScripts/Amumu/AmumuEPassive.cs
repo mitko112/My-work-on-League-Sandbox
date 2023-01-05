@@ -50,6 +50,8 @@ namespace Buffs
                 var reductionbylevel = owner.GetSpell("Tantrum").CastInfo.SpellLevel;
                 data.Damage = -2* reductionbylevel;
 
+                owner.GetSpell("Tantrum").LowerCooldown(0.5f); 
+
             }
         }
         

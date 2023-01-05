@@ -1,17 +1,21 @@
 using GameServerCore.Enums;
-using static LeagueSandbox.GameServer.API.ApiFunctionManager;
-using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.Scripting.CSharp;
+
+using GameServerCore.Scripting.CSharp;
+
 using LeagueSandbox.GameServer.GameObjects.StatsNS;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects;
 using LeagueSandbox.GameServer.GameObjects.SpellNS;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
-
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.API;
 
 namespace Buffs
+
 {
-    internal class UndyingRage : IBuffGameScript
+    internal class JaxEDodge : IBuffGameScript
+
+
     {
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
@@ -20,28 +24,41 @@ namespace Buffs
             MaxStacks = 1
         };
 
-        
+        Spell Spell;
+
         public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
-        {
-            
-            
 
-            
-                unit.SetStatus(StatusFlags.Invulnerable, true);
-            
+        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
+
+
+
+        {
+            Spell = ownerSpell;
+            ApiEventManager.OnTakeDamage.AddListener(this, unit, OnTakeDamage, false);
+
         }
 
-        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
+
+        public void OnTakeDamage(DamageData data)
+
+
         {
+            if (data.IsAutoAttack)
+            {
+                
+
+                data.DamageResultType = DamageResultType.RESULT_DODGE; 
+
+                
 
 
-
-
-            unit.SetStatus(StatusFlags.Invulnerable, false);
-
+            }
         }
 
     }
 }
+
+
+
+

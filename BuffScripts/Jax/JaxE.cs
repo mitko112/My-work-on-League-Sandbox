@@ -30,6 +30,7 @@ namespace Buffs
 
         public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
+            
             ((ObjAIBase)unit).SetSpell("JaxCounterStrikeAttack", 2, true);
         }
 
