@@ -4,58 +4,36 @@ using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.GameObjects.SpellNS;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
-using GameServerLib.GameObjects.AttackableUnits;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
 using GameServerCore.Enums;
 using LeagueSandbox.GameServer.GameObjects.StatsNS;
 using LeagueSandbox.GameServer.GameObjects;
+using static LeaguePackets.Game.Common.CastInfo;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 
 namespace Buffs
 {
-    internal class AkaliShroudBuff : IBuffGameScript
+    internal class AkaliWDebuff : IBuffGameScript
     {
-        public BuffType BuffType => BuffType.COMBAT_DEHANCER;
-        public BuffAddType BuffAddType => BuffAddType.RENEW_EXISTING;
-        public int MaxStacks => 1;
-        public bool IsHidden => false;
-
-        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
-
-        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
+        Particle Slow;
+        public  BuffScriptMetaData BuffMetaData { get; } = new()
         {
-            var owner = ownerSpell.CastInfo.Owner;
-            var Champs = GetChampionsInRange(unit.Position, 50000, true);
-            foreach (Champion player in Champs)
-            {
-                if (player.Team.Equals(owner.Team))
-                {
-                    owner.SetInvisible((int)player.GetPlayerId(), owner, 0.5f, 0.1f);
-                }
-                if (!(player.Team.Equals(owner.Team)))
-                {
-                    if (player.IsAttacking)
-                    {
-                        player.CancelAutoAttack(false);
-                    }
-                    owner.SetInvisible((int)player.GetPlayerId(), owner, 0f, 0.1f);
-                }
-            }
-            unit.SetStatus(StatusFlags.Targetable, false);
-        }
-
-        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
+            BuffType = BuffType.AURA,
+            BuffAddType = BuffAddType.REPLACE_EXISTING
+        };
+        public  StatsModifier StatsModifier { get; protected set; } = new();
+        Spell Spell;
+        public  void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell )
         {
-            var owner = ownerSpell.CastInfo.Owner;
-            var Champs = GetChampionsInRange(unit.Position, 50000, true);
-            foreach (Champion player in Champs)
-            {
-                owner.SetInvisible((int)player.GetPlayerId(), owner, 1f, 0.1f);
-            }
-            unit.SetStatus(StatusFlags.Targetable, true);
+            Spell = ownerSpell;
+            var owner = Spell.CastInfo.Owner;
+            Slow = AddParticleTarget(unit,  unit,"Global_Slow", unit, buff.Duration);
+            StatsModifier.MoveSpeed.PercentBonus -= 0.14f + 0.04f * (owner.GetSpell("AkaliSmokeBomb").CastInfo.SpellLevel);
+            unit.AddStatModifier(StatsModifier);
         }
-
+        public  void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
+        {
+            RemoveParticle(Slow);
+        }
     }
 }
+
