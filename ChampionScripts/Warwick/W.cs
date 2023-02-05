@@ -1,57 +1,40 @@
-using GameServerCore.Domain.GameObjects;
-using GameServerCore.Domain.GameObjects.Spell;
+using System.Linq;
+using GameServerCore;
+using GameServerCore.Enums;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
-using System.Numerics;
 using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using System.Numerics;
 
 namespace Spells
 {
-    public class Hunterscall: ISpellScript
+    public class HuntersCall : ISpellScript
     {
-        public ISpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
+        public SpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
             // TODO
         };
 
-        public void OnActivate(IObjAiBase owner, ISpell spell)
-        {
-        }
 
-        public void OnDeactivate(IObjAiBase owner, ISpell spell)
-        {
-        }
 
-        public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
+        public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
+
             AddBuff("Hunterscall", 5.0f, 1, spell, owner, owner);
-        }
 
-        public void OnSpellCast(ISpell spell)
-        {
-            
-        }
 
-        public void OnSpellPostCast(ISpell spell)
+            foreach (var allytarget in GetUnitsInRange(owner.Position, 1100, true)
+                   .Where(x => x.Team != CustomConvert.GetEnemyTeam(owner.Team)))
+            {
+                if (target is ObjAIBase && owner != allytarget)
 
-        {
-            
-        }
+                    AddBuff("WarwickWAura", 5.0f, 1, spell,allytarget, owner);
+            }
 
-        public void OnSpellChannel(ISpell spell)
-        {
-        }
 
-        public void OnSpellChannelCancel(ISpell spell)
-        {
-        }
-
-        public void OnSpellPostChannel(ISpell spell)
-        {
-        }
-
-        public void OnUpdate(float diff)
-        {
         }
     }
 }
