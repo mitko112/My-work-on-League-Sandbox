@@ -36,22 +36,30 @@ namespace Spells
         {
             var owner = spell.CastInfo.Owner;
             var APratio = owner.Stats.AbilityPower.Total * 0.3f;
-           
-            var APRatiofury = owner.Stats.AbilityPower.Total * 0.012f;
-             var fury = owner.GetBuffWithName("BattleFury").StackCount;
-             var total = fury * 0.5f * APRatiofury;
-            
-                
-                float Heal = 30 * spell.CastInfo.SpellLevel + APratio + total;
+
+
+
+            if (owner.HasBuff("BattleFury"))
+            {
+                var APRatiofury = owner.Stats.AbilityPower.Total * 0.012f;
+                var fury = owner.GetBuffWithName("BattleFury").StackCount;
+                var total = fury * 0.5f * APRatiofury;
+                float Heali = 30 * spell.CastInfo.SpellLevel + APratio + total;
+                owner.Stats.CurrentHealth += Heali;
+
+            }
+            else
+            {
+                float Heal = 30 * spell.CastInfo.SpellLevel + APratio;
                 owner.Stats.CurrentHealth += Heal;
-
-                
-                
-
-            
+            }
             
 
-                AddParticleTarget(owner, owner, "Global_Heal.troy", owner, 1f);
+            
+               
+
+             
+            AddParticleTarget(owner, owner, "Global_Heal.troy", owner, 1f);
 
             if (owner.HasBuff("BattleFury"))
                 {
