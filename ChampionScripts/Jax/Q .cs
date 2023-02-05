@@ -33,26 +33,28 @@ namespace Spells
         public void OnSpellPostCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner;
-            var APratio = owner.Stats.AbilityPower.Total*0.6f;
+            var APratio = owner.Stats.AbilityPower.Total * 0.6f;
             var ADratio = owner.Stats.AttackDamage.FlatBonus;
-            var damage = 70* spell.CastInfo.SpellLevel +ADratio + APratio;
+            var damage = 70 * spell.CastInfo.SpellLevel + ADratio + APratio;
             var target = spell.CastInfo.Targets[0].Unit;
             var current = new Vector2(owner.Position.X, owner.Position.Y);
             var to = Vector2.Normalize(new Vector2(target.Position.X, target.Position.Y) - current);
             var range = to * 700;
             var trueCoords = current + range;
+            float Dist = Vector2.Distance(owner.Position, trueCoords);
+            
 
+            
 
-
-            PlayAnimation(owner, "Spell2", 0.7f);
-            ForceMovement(owner, "Spell2", target.Position, 2200, 0, 0, 0);
+            ForceMovement(owner, null, target.Position, Dist * 1.22f, 0, Dist * 0.05f, 0);
             AddParticleTarget(owner, Target, "jax_leapstrike_tar.troy", Target, 1f, 1f);
             Target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
-            
-            
-              
+            PlayAnimation(owner, "Spell2");
+            PlayAnimation(owner, "Spell3_landing");
+
+
         }
 
-       
+
     }
 }
