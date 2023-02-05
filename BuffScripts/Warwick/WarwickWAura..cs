@@ -10,7 +10,7 @@ using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
 
 namespace Buffs
 {
-    internal class Hunterscall : IBuffGameScript
+    internal class WarwickWAura : IBuffGameScript
     {
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
@@ -30,10 +30,10 @@ namespace Buffs
         {
             var owner = ownerSpell.CastInfo.Owner;
 
-            StatsModifier.AttackSpeed.PercentBonus = 0.4f + (0.1f * ownerSpell.CastInfo.SpellLevel);
+            StatsModifier.AttackSpeed.PercentBonus = 0.2f + (0.05f * ownerSpell.CastInfo.SpellLevel);
             unit.AddStatModifier(StatsModifier);
 
-            
+
         }
 
         public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
