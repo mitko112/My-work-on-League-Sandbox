@@ -1,5 +1,3 @@
-
-
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.GameObjects.SpellNS;
@@ -15,15 +13,16 @@ using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 namespace Buffs
 {
 
-    internal class Feast : IBuffGameScript
+    internal class MalphiteCleave : IBuffGameScript
     {
 
 
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.COMBAT_ENCHANCER,
-            BuffAddType = BuffAddType.STACKS_AND_OVERLAPS,
-            MaxStacks = 6
+            BuffAddType = BuffAddType.REPLACE_EXISTING,
+            MaxStacks = 1,
+            IsHidden = false
         };
         public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
@@ -32,41 +31,35 @@ namespace Buffs
         Spell Spell;
         public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            Spell = ownerSpell;
-            Unit = unit;
             var owner = ownerSpell.CastInfo.Owner;
-            thisBuff = buff;
-            ApiEventManager.OnDeath.AddListener(this, owner, OnDeath, false);
-
-            StatsModifier.Size.PercentBonus += 0.2f;
-            StatsModifier.Range.FlatBonus = 3.8f * ownerSpell.CastInfo.SpellLevel;
-            var HealthBuff = 90f * ownerSpell.CastInfo.SpellLevel;
-            StatsModifier.HealthPoints.BaseBonus += HealthBuff;
-
-            unit.AddStatModifier(StatsModifier);
-            if (!owner.IsDead) unit.Stats.CurrentHealth += HealthBuff;
+            Spell = ownerSpell;
+            ApiEventManager.OnHitUnit.AddListener(this, owner, ApplySplashDamage, false);
 
         }
-        public void OnDeath(DeathData data)
-        {
-            var stackCount = thisBuff.StackCount;
-            var half = stackCount / 2;
-            var difference = stackCount - half;
-            var buffList = data.Unit.GetBuffsWithName("Feast");
-            foreach (Buff rBuff in buffList)
-            {
-                rBuff.DeactivateBuff();
-            }
 
-            if (stackCount < 2)
+        public void ApplySplashDamage(DamageData damageData)
+        {
+            var owner = damageData.Attacker;
+            var target = damageData.Target;
+            var splashDamage = owner.Stats.AttackDamage.Total * (0.22f + 0.08f * Spell.CastInfo.SpellLevel);
+            var referencePoint = GetPointFromUnit(owner, 200f);
+            var enemies = GetUnitsInRange(referencePoint, 200f, true);
+
+            if (!owner.HasBuff("ObduracyBuff"))
             {
-                thisBuff.DeactivateBuff();
+                AddParticleTarget(owner, target, "Malphite_Base_CleaveHit.troy", target);
             }
             else
             {
-                for (int i = 1; i <= difference; i++)
+                AddParticleTarget(owner, target, "Malphite_Base_CleaveEnragedHit.troy", target);
+            }
+
+            foreach (var enemy in enemies)
+            {
+                if (enemy != target && enemy != owner)
                 {
-                    AddBuff("Feast", 1f, 1, Spell, data.Unit, data.Unit as ObjAIBase, true);
+                    enemy.TakeDamage(owner, splashDamage, DamageType.DAMAGE_TYPE_PHYSICAL,
+                        DamageSource.DAMAGE_SOURCE_SPELLAOE, false);  
                 }
             }
 
@@ -74,25 +67,8 @@ namespace Buffs
 
         public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-
+            
         }
 
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

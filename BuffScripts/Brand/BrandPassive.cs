@@ -13,7 +13,7 @@ using LeagueSandbox.GameServer.GameObjects.SpellNS;
 namespace Buffs
 
 {
-    internal class CharScriptBrand: IBuffGameScript
+    internal class BrandPassive: IBuffGameScript
     {
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {

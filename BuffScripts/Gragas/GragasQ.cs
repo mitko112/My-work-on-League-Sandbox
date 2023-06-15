@@ -8,6 +8,8 @@ using LeagueSandbox.GameServer.GameObjects.SpellNS;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects.StatsNS;
 using LeagueSandbox.GameServer.GameObjects;
+using Roy_T.AStar.Primitives;
+using System.Numerics;
 
 namespace Buffs
 {
@@ -24,16 +26,14 @@ namespace Buffs
 
         Spell ThisSpell;
         Buff ThisBuff;
-        Minion Shadow;
-        Buff ShadowBuff;
-        public bool QueueSwap;
         bool hascasted = false;
-
+        ObjAIBase Owner;
         public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             ThisSpell = ownerSpell;
             ThisBuff = buff;
 
+            Owner = ownerSpell.CastInfo.Owner;
             ApiEventManager.OnSpellCast.AddListener(this, ownerSpell.CastInfo.Owner.GetSpell("GragasQ"), TargetExecute);
         }
         public void TargetExecute(Spell spell)
@@ -43,7 +43,18 @@ namespace Buffs
 
         public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            if (hascasted == false) ownerSpell.CastInfo.Owner.SetSpell("GragasQ", 0, true);
+            if (hascasted == false)
+            {
+                ownerSpell.CastInfo.Owner.SetSpell("GragasQ", 0, true);
+                var Position = new Vector2(ownerSpell.CastInfo.TargetPositionEnd.X, ownerSpell.CastInfo.TargetPositionEnd.Z);
+                var ap = Owner.Stats.AbilityPower.Total * 0.3f;
+                var damage = (40 * (ThisSpell.CastInfo.SpellLevel)) + ap;
+                var enemies = GetUnitsInRange(Position, 250f, true);
+                foreach (var enemy in enemies)
+                {
+                    enemy.TakeDamage(ThisSpell.CastInfo.Owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
+                }
+            }
             SealSpellSlot(ownerSpell.CastInfo.Owner, SpellSlotType.SpellSlots, 0, SpellbookType.SPELLBOOK_CHAMPION, false);
         }
 
