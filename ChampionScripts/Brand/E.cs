@@ -2,7 +2,7 @@
 
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
-using System.Numerics;
+
 using GameServerCore.Enums;
 using LeagueSandbox.GameServer.API;
 using GameServerCore.Scripting.CSharp;
@@ -13,6 +13,7 @@ using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
 using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+
 
 namespace Spells
 {
@@ -32,6 +33,7 @@ namespace Spells
             var owner = spell.CastInfo.Owner as Champion;
             var APratio = owner.Stats.AbilityPower.Total * 0.55f;
             var damage = 70f * owner.Spells[2].CastInfo.SpellLevel + APratio;
+            var target = spell.CastInfo.Targets[0].Unit;
             if (spell.CastInfo.Targets[0].Unit.HasBuff("BrandPassive"))
             {
                 var units = GetUnitsInRange(spell.CastInfo.Targets[0].Unit.Position, 300f, true);
@@ -45,6 +47,8 @@ namespace Spells
                 }
             }
             AddBuff("BrandPassive", 4f, 1, spell, spell.CastInfo.Targets[0].Unit, owner, false);
+            AddParticleTarget(owner, target, "BrandConflagration_tar.troy", target, 1f, 1f);
+            AddParticleTarget(owner, owner, "BrandConflagration_cas.troy", owner, 1f, 1f);
             spell.CastInfo.Targets[0].Unit.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_PERIODIC, false);
         }
 

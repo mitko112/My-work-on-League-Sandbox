@@ -7,6 +7,8 @@ using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
 using LeagueSandbox.GameServer.GameObjects.SpellNS;
 using LeagueSandbox.GameServer.GameObjects;
+using LeagueSandbox.GameServer.API;
+using GameServerLib.GameObjects.AttackableUnits;
 
 namespace Spells
 {
@@ -20,13 +22,14 @@ namespace Spells
             // TODO
         };
 
+       
         public void OnActivate(ObjAIBase owner, Spell spell)
         {
+            
+            
         }
 
-        public void OnDeactivate(ObjAIBase owner, Spell spell)
-        {
-        }
+        
 
         public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
@@ -58,6 +61,8 @@ namespace Spells
                 AddBuff("Feast", 1f, 1, spell, owner, owner, true);
             }
             AddParticleTarget(owner, Target, "feast_tar.troy", Target, 1f, 1f);
+
+            
         }
 
     }

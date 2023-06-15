@@ -1,20 +1,18 @@
-using GameServerCore.Enums;
-using GameServerCore.Scripting.CSharp;
-using LeagueSandbox.GameServer.API;
-using LeagueSandbox.GameServer.GameObjects;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
-using LeagueSandbox.GameServer.GameObjects.SpellNS;
-using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
-using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using GameServerCore.Scripting.CSharp;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
+using LeagueSandbox.GameServer.API;
+
 namespace Spells
 {
-    public class SeismicShard : ISpellScript
+    public class JudicatorReckoning : ISpellScript
     {
         public SpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
@@ -34,13 +32,20 @@ namespace Spells
         public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
         {
             var owner = spell.CastInfo.Owner as Champion;
-            var APratio = owner.Stats.AbilityPower.Total*0.6f;
-            var damage = 70*spell.CastInfo.SpellLevel  + APratio;
 
-            AddParticleTarget(owner, target, "Malphite_Base_SeismicShard_mis.troy", target, 1f);
+            var ap = owner.Stats.AbilityPower.Total * 0.4f;
+           
+            var damage = 60 * spell.CastInfo.SpellLevel + ap ;
+
             target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
-            AddBuff("Slow", 3f, 1, spell, target, owner);
+
+
+            AddParticleTarget(owner, target, "Reckoning_mis.troy", target);
+
+            AddBuff("JudicatorReckoning", 3f, 1, spell, target, owner, false);
+            AddBuff("JudicatorHolyFervorDebuff", 5f, 1, spell, target, owner, false);
         }
+
 
     }
 }

@@ -44,9 +44,12 @@ namespace Spells
         public void OnSpellPostCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner;
-            var trueCoords = GetPointFromUnit(owner, 600f);
+            
+            var targetPos = new Vector2(spell.CastInfo.TargetPositionEnd.X, spell.CastInfo.TargetPositionEnd.Z);
 
-            ForceMovement(owner, "Spell3", trueCoords, 1200, 0, 0, 0);
+            FaceDirection(targetPos, owner);
+
+            ForceMovement(owner, "Spell3", targetPos, 1200, 0, 0, 0);
             s = spell.CreateSpellSector(new SectorParameters
             {
                 BindObject = owner,
