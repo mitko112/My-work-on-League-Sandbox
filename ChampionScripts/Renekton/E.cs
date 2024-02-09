@@ -33,8 +33,10 @@ namespace Spells
             var owner = spell.CastInfo.Owner;
             var Adratio = owner.Stats.AttackDamage.FlatBonus * 0.9f;
             var damage = 40 * (spell.CastInfo.SpellLevel) + Adratio;
-            var trueCoords = GetPointFromUnit(owner, 425f);
-            ForceMovement(owner, "Spell3", trueCoords, 1200, 0, 0, 0);
+            var targetPos = new Vector2(spell.CastInfo.TargetPositionEnd.X, spell.CastInfo.TargetPositionEnd.Z);
+
+            FaceDirection(targetPos, owner);
+            ForceMovement(owner, "Spell3", targetPos, 1200, 0, 0, 0);
             var units = GetUnitsInRange(owner.Position, 750f, true);
             for (int i = 0; i < units.Count; i++)
             {
