@@ -34,25 +34,25 @@ namespace Spells
 
         public void OnSpellPostCast(Spell spell)
         {
+            var mana = 0;
             var owner = spell.CastInfo.Owner;
             var APratio = owner.Stats.AbilityPower.Total * 0.3f;
+            owner.Stats.CurrentMana = mana;
+            
 
 
-
-            if (owner.HasBuff("BattleFury"))
-            {
                 var APRatiofury = owner.Stats.AbilityPower.Total * 0.012f;
-                var fury = owner.GetBuffWithName("BattleFury").StackCount;
-                var total = fury * 0.5f * APRatiofury;
+                var fury = owner.Stats.CurrentMana;
+            var fury1 = 0.5f * APRatiofury;
+                var total = fury * fury1;
                 float Heali = 30 * spell.CastInfo.SpellLevel + APratio + total;
                 owner.Stats.CurrentHealth += Heali;
-
-            }
-            else
-            {
-                float Heal = 30 * spell.CastInfo.SpellLevel + APratio;
-                owner.Stats.CurrentHealth += Heal;
-            }
+            if (owner.HasBuff("BattleFury"))
+                {
+                RemoveBuff(owner,"BattleFury");
+                }
+            
+            
             
 
             
@@ -61,16 +61,12 @@ namespace Spells
              
             AddParticleTarget(owner, owner, "Global_Heal.troy", owner, 1f);
 
-            if (owner.HasBuff("BattleFury"))
-                {
-
-                RemoveBuff(owner,"BattleFury");
 
                 }
             
 
             
-        }
+        
         
     }
 }

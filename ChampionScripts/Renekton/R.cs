@@ -28,7 +28,12 @@ namespace Spells
         {
             AddBuff("RenektonReignOfTheTyrant", 15f, 1, spell, owner, owner);
            AddParticleTarget(owner, owner, "RenektonDominus_aura.troy", owner, 15f);
-           
+            if (owner.Stats.CurrentMana > 50)
+            {
+                var mana = -50;
+                owner.Stats.CurrentMana = mana;
+            }
+
         }
 
     }

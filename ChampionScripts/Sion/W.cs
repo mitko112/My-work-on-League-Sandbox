@@ -17,6 +17,7 @@ namespace Spells
     {
         ObjAIBase Owner;
         
+        Vector2 spellpos;
         public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
             TriggersSpellCasts = true,
@@ -34,8 +35,10 @@ namespace Spells
 
             AddBuff("SionWShield", 10f, 1, spell, Owner, Owner, false);
             AddBuff("SionWSwitch", 10f, 1, spell, Owner, Owner, false);
-
             
+            
+            
+
         }
 
 

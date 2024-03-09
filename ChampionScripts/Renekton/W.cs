@@ -37,8 +37,17 @@ namespace Spells
        
             
             
-            AddBuff("RenektonExecute", 7f, 1, spell, Owner, Owner, false);
+            
             AddParticleTarget(owner, owner, "Renekton_Weapon_Hot.troy", owner, 7f);
+            if (owner.Stats.CurrentMana > 50)
+            {
+                var mana = 50;
+                owner.Stats.CurrentMana -= mana;
+
+                AddBuff("RenektonExecuteEmpowered", 7f, 1, spell, Owner, Owner, false);
+            }
+            else
+                AddBuff("RenektonExecute", 7f, 1, spell, Owner, Owner, false);
         }
 
        

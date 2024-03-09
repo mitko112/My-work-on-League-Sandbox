@@ -11,7 +11,7 @@ using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 using LeagueSandbox.GameServer.API;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
-
+using GameServerLib.GameObjects.AttackableUnits;
 
 namespace Spells
 {
@@ -23,23 +23,26 @@ namespace Spells
             // TODO
         };
 
-
+        
+        
         public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
-            
-            AddBuff("BattleFury", 50, 50, spell, owner, owner, true);
+            var mana = 50;
+            owner.Stats.CurrentMana += mana;
+            AddBuff("BattleFury", 1, 1, spell, owner, owner, true);
         }
 
         public void OnSpellPostCast(Spell spell)
         {
+             
             var owner = spell.CastInfo.Owner as Champion;
-
-
-            AddBuff("UndyingRage", 5f, 1, spell, owner, owner);
+            
+                AddBuff("UndyingRage", 5f, 1, spell, owner, owner);
+                }
+        }
             
             
         }
     
-    }
+    
 
-}

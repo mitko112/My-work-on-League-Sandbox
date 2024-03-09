@@ -9,7 +9,7 @@ using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 namespace CharScripts
 {
 
-    public class CharScriptTryndamere : ICharScript
+    public class CharScriptRenekton : ICharScript
 
     {
         Spell Spell;
@@ -21,7 +21,7 @@ namespace CharScripts
 
 
             {
-                AddBuff("BattleFury", 1, 1, spell, owner, owner, true);
+               
                 ApiEventManager.OnHitUnit.AddListener(this, owner, OnHitUnit, false);
             }
         }
@@ -32,7 +32,7 @@ namespace CharScripts
             var owner = Spell.CastInfo.Owner;
             var mana = 5;
             owner.Stats.CurrentMana += mana;
-            AddBuff("BattleFury", 1, 1, Spell, owner, owner, true);
+            
         }
 
 
@@ -45,5 +45,3 @@ namespace CharScripts
 
     }
 }
-
-

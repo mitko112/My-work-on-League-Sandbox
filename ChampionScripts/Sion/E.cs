@@ -10,6 +10,7 @@ using GameServerCore.Enums;
 using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
 using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 using LeagueSandbox.GameServer.API;
+using GameServerLib.GameObjects.AttackableUnits;
 
 namespace Spells
 {
@@ -27,8 +28,12 @@ namespace Spells
         {
             Owner = owner;
             Spell = spell;
+            ApiEventManager.OnKillUnit.AddListener(this, owner, OnKillUnit, false);
         }
-
+        public void OnKillUnit(DeathData data)
+        {
+            AddBuff("SionEnrageHP", 1, 1, Spell, Owner, Owner, true);
+        }
        
         public void OnSpellPostCast(Spell spell)
         {
