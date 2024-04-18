@@ -14,11 +14,13 @@ using LeagueSandbox.GameServer.GameObjects.StatsNS;
 using LeagueSandbox.GameServer.GameObjects;
 using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
 using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Buffs
 {
     class RenektonReignOfTheTyrant : IBuffGameScript
     {
+        
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.COMBAT_ENCHANCER,
@@ -30,26 +32,30 @@ namespace Buffs
 
         ObjAIBase Owner;
         public SpellSector ReneRAOE;
+        
         public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
+            
             Owner = ownerSpell.CastInfo.Owner;
             ApiEventManager.OnSpellHit.AddListener(this, ownerSpell, TargetExecute, false);
 
-           
-            
+
+
             var HealthBuff = 200f;
+
 
             StatsModifier.Size.PercentBonus = StatsModifier.Size.PercentBonus + 0.2f;
             StatsModifier.HealthPoints.BaseBonus += HealthBuff;
-            StatsModifier.Range.FlatBonus = 25*ownerSpell.CastInfo.SpellLevel;
-            StatsModifier.ManaRegeneration.FlatBonus = 5f;
+            StatsModifier.Range.FlatBonus = 25 * ownerSpell.CastInfo.SpellLevel;
+
             unit.AddStatModifier(StatsModifier);
             unit.Stats.CurrentHealth += HealthBuff;
-            
-             
-        
 
-           ReneRAOE = ownerSpell.CreateSpellSector(new SectorParameters
+
+
+
+
+            ReneRAOE = ownerSpell.CreateSpellSector(new SectorParameters
             {
                 BindObject = ownerSpell.CastInfo.Owner,
                 Length = 375f,
@@ -58,13 +64,18 @@ namespace Buffs
                 OverrideFlags = SpellDataFlags.AffectEnemies | SpellDataFlags.AffectNeutral | SpellDataFlags.AffectMinions | SpellDataFlags.AffectHeroes,
                 Type = SectorType.Area
             });
+
+
+
         }
         public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
         {
             float AP = Owner.Stats.AbilityPower.Total * 0.1f;
             float damage = 30 + (30 * spell.CastInfo.SpellLevel) + AP;
 
-            target.TakeDamage(Owner, damage, DamageType.DAMAGE_TYPE_MAGICAL,DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
+
+            target.TakeDamage(Owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
+
         }
         public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
@@ -74,6 +85,7 @@ namespace Buffs
         public void OnUpdate(float diff)
         {
 
+            
+            }
         }
     }
-}

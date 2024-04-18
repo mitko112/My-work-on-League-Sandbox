@@ -27,11 +27,12 @@ namespace Spells
         public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
             AddBuff("RenektonReignOfTheTyrant", 15f, 1, spell, owner, owner);
-           AddParticleTarget(owner, owner, "RenektonDominus_aura.troy", owner, 15f);
+            AddBuff("RenektonRFury", 15f, 1, spell, owner, owner);
+            AddParticleTarget(owner, owner, "RenektonDominus_aura.troy", owner, 15f);
             if (owner.Stats.CurrentMana > 50)
             {
-                var mana = -50;
-                owner.Stats.CurrentMana = mana;
+                var mana = 50;
+                owner.Stats.CurrentMana -= mana;
             }
 
         }
