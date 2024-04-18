@@ -11,8 +11,8 @@ using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
 using GameServerCore.Enums;
 using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.Logging;
 using LeagueSandbox.GameServer.GameObjects;
-
 
 namespace Buffs
 {
@@ -21,28 +21,39 @@ namespace Buffs
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
             BuffType = BuffType.COMBAT_ENCHANCER,
-            BuffAddType = BuffAddType.REPLACE_EXISTING,
-            MaxStacks = 1
+            BuffAddType = BuffAddType.REPLACE_EXISTING
         };
+
         public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-        
+        private Buff thisBuff;
+
+        private float currentBonusMoveSpeed = -1f;
 
         public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            
-            StatsModifier.AttackDamage.FlatBonus += unit.Stats.MoveSpeed.PercentBonus * 0.2f; 
-            unit.AddStatModifier(StatsModifier);
-            
+            thisBuff = buff;
+
+            OnUpdateStats(unit, 0);
+            ApiEventManager.OnUpdateStats.AddListener(this, unit, OnUpdateStats);
         }
 
-        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
+        public void OnUpdateStats(AttackableUnit unit, float diff)
         {
-            
-        }
+            float bonusMoveSpeed = unit.Stats.MoveSpeed.Total - unit.Stats.MoveSpeed.BaseValue;
+            if (currentBonusMoveSpeed != bonusMoveSpeed)
+            {
+                unit.RemoveStatModifier(StatsModifier);
 
-        public void OnUpdate(float diff)
-        {
+                currentBonusMoveSpeed = bonusMoveSpeed;
+
+                StatsModifier.AttackDamage.FlatBonus = bonusMoveSpeed * 0.2f;
+
+                unit.AddStatModifier(StatsModifier);
+
+                thisBuff.SetToolTipVar(0, StatsModifier.AttackDamage.FlatBonus);
+                thisBuff.SetToolTipVar(1, 20);
+            }
 
         }
     }
