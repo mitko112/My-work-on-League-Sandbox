@@ -6,37 +6,25 @@ using LeagueSandbox.GameServer.GameObjects.StatsNS;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects;
 using LeagueSandbox.GameServer.GameObjects.SpellNS;
-
-
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.API;
 namespace Buffs
 {
-    internal class IreliaPassiveMark : IBuffGameScript
+    internal class IreliaVoracity : IBuffGameScript
     {
+        Spell Passive;
+        ObjAIBase Irelia;
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
-            BuffType = BuffType.INTERNAL,
-            BuffAddType = BuffAddType.REPLACE_EXISTING,
-            MaxStacks = 3
+            BuffType = BuffType.COUNTER,
+            BuffAddType = BuffAddType.STACKS_AND_RENEWS,
+            MaxStacks = 3,
+            
         };
-
-
         public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
-
-
-        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
-        {
-            
-            
-                StatsModifier.Tenacity.FlatBonus += 0.1f;
-                unit.AddStatModifier(StatsModifier);
-            
-
-
+       
+            }
         }
-
-
-    }
-
-
-
-    }
+    

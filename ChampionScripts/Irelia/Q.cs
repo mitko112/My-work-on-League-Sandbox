@@ -47,6 +47,16 @@ namespace Spells
             Target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
 
             ForceMovement(owner, "Spell4", Target.Position, 2200, 0, 0, 0);
+
+            if (Target.IsDead)
+            {
+                spell.SetCooldown(0f);
+                var mana = 35;
+                owner.Stats.CurrentMana += mana;
+
+            }
+
+
             
         }
 

@@ -18,46 +18,57 @@ namespace Buffs
 {
     internal class IreliaTranscendentBlades : IBuffGameScript
     {
+        Particle R1;
+        Particle R2;
+        Particle L1;
+        Particle L2;
+        Particle M1;
+        ObjAIBase Irelia;
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
-            BuffType = BuffType.INTERNAL,
-            BuffAddType = BuffAddType.REPLACE_EXISTING,
-            MaxStacks = 1
+            BuffType = BuffType.COMBAT_ENCHANCER,
+            BuffAddType = BuffAddType.STACKS_AND_RENEWS,
+            MaxStacks = 4
         };
-        
-
-        public StatsModifier StatsModifier { get; private set; }
-
-        int counter = 0;
-        ObjAIBase Unit;
-        Buff Buff;
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
         public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            Buff = buff;
-            if (unit is ObjAIBase obj)
+            Irelia = ownerSpell.CastInfo.Owner as Champion;
+            Irelia.Spells[3].SetCooldown(0.5f, true);
+            var trueCoords = new Vector2(ownerSpell.CastInfo.TargetPosition.X, ownerSpell.CastInfo.TargetPosition.Z);
+            SpellCast(Irelia, 0, SpellSlotType.ExtraSlots, trueCoords, trueCoords, true, Vector2.Zero);
+            switch (buff.StackCount)
             {
-                Unit = obj;
-                obj.SetSpell("IreliaTranscendentBladesSpell", 3, true);
-                ApiEventManager.OnSpellCast.AddListener(this, ownerSpell.CastInfo.Owner.GetSpell("IreliaTranscendentBladesSpell"), OnSpellCast);
-            }
-        }
-
-        public void OnSpellCast(Spell spell)
-        {
-            counter++;
-            if (counter >= 4 && (Unit).Spells[3].SpellName == "IreliaTranscendentBladesSpell")
-            {
-                Unit.SetSpell("IreliaTranscendentBlades", 3, true);
-                Buff.DeactivateBuff();
+                case 1:
+                    PlayAnimation(Irelia, "Spell4");
+                    R1 = AddParticleTarget(Irelia, Irelia, "irelia_ult_dagger_active_04.troy", Irelia, 25000, 1, "BUFFBONE_CSTM_DAGGER5");
+                    L1 = AddParticleTarget(Irelia, Irelia, "irelia_ult_dagger_active_04.troy", Irelia, 25000, 1, "BUFFBONE_CSTM_DAGGER2");
+                    R2 = AddParticleTarget(Irelia, Irelia, "irelia_ult_dagger_active_04.troy", Irelia, 25000, 1, "BUFFBONE_CSTM_DAGGER4");
+                    L2 = AddParticleTarget(Irelia, Irelia, "irelia_ult_dagger_active_04.troy", Irelia, 25000, 1, "BUFFBONE_CSTM_DAGGER1");
+                    //p5 = AddParticleTarget(Irelia, Irelia, "irelia_ult_dagger_active_04.troy", Irelia, buff.Duration,1,"BUFFBONE_Cstm_Sword1_loc");
+                    M1 = AddParticleTarget(Irelia, Irelia, "irelia_ult_magic_resist.troy", Irelia, 25000);
+                    RemoveParticle(R1);
+                    break;
+                case 2:
+                    RemoveParticle(L1);
+                    break;
+                case 3:
+                    RemoveParticle(R2);
+                    break;
+                case 4:
+                    RemoveParticle(L2);
+                    buff.DeactivateBuff();
+                    break;
             }
         }
         public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            ApiEventManager.OnSpellCast.RemoveListener(this);
-        }
-
-        public void OnUpdate(float diff)
-        {
+            RemoveParticle(R1);
+            RemoveParticle(L1);
+            RemoveParticle(R2);
+            RemoveParticle(L2);
+            RemoveParticle(M1);
+            Irelia.Spells[3].SetCooldown((80f - (10 * Irelia.Spells[3].CastInfo.SpellLevel)) * (1 + Irelia.Stats.CooldownReduction.Total), true);
         }
     }
 }

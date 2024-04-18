@@ -1,3 +1,5 @@
+using GameServerCore.Enums;
+using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.API;
 using LeagueSandbox.GameServer.GameObjects;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
@@ -35,14 +37,18 @@ namespace Spells
         {
             var owner = spell.CastInfo.Owner;
             var ap = owner.Stats.AbilityPower.Total*0.5f;
-            float damage = 80 * spell.CastInfo.SpellLevel;
+            float damage = 80 * spell.CastInfo.SpellLevel + ap;
             
 
 
             Target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
-
-            AddBuff("Stun", 1f, 1, spell, Target, owner);
-            AddParticleTarget(owner, Target, "irelia_ult_tar.troy", Target, 1f);
+            if (Target.Stats.CurrentHealth > owner.Stats.CurrentHealth)
+                {
+                AddBuff("Stun", 1f, 1, spell, Target, owner);
+                AddParticleTarget(owner, Target, "irelia_ult_tar.troy", Target, 1f);
+            }
+            else
+                AddBuff("IreliaE", 1f, 1, spell, Target, owner);
         }
 
      

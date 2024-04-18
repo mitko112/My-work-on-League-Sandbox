@@ -14,64 +14,47 @@ using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 namespace Spells
 {
-    public class IreliaTranscendentBladesSpell : ISpellScript
+    public class IreliaTranscendentBlades : ISpellScript
     {
-        public SpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
+        ObjAIBase Irelia;
+        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
             TriggersSpellCasts = true,
-            MissileParameters = new MissileParameters
-            {
-                Type = MissileType.Circle
-            },
             IsDamagingSpell = true
-        
-            // TODO
         };
-
+        public void OnSpellCast(Spell spell)
+        {
+            Irelia = spell.CastInfo.Owner as Champion;
+            AddBuff("IreliaTranscendentBlades", 10f, 1, spell, Irelia, Irelia);
+        }
+    }
+    public class IreliaTranscendentBladesSpell : ISpellScript
+    {
+        float Damage;
+        ObjAIBase Irelia;
+        SpellMissile Blade;
+        public SpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
+        {
+            IsDamagingSpell = true,
+            TriggersSpellCasts = true
+        };
         public void OnActivate(ObjAIBase owner, Spell spell)
         {
+            Irelia = owner = spell.CastInfo.Owner as Champion;
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
         }
-
-        
         public void OnSpellPreCast(ObjAIBase owner, Spell spell, AttackableUnit target, Vector2 start, Vector2 end)
         {
-
-         FaceDirection(end, owner);
-
+            Blade = spell.CreateSpellMissile(new MissileParameters { Type = MissileType.Circle });
         }
 
         public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
-           {
-            
-                var owner = spell.CastInfo.Owner;
-                var APratio = owner.Stats.AbilityPower.Total*0.5f;
-                var ADratio = owner.Stats.AttackDamage.FlatBonus * 0.6f;
-                var damage = 80*(spell.CastInfo.SpellLevel) + ADratio + APratio;
-                
-
-                target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
-                AddParticleTarget(owner, owner, "irelia_ult_tar.troy", owner, lifetime: 1f);
-
-               var units = GetUnitsInRange(owner.Position, 1000f, true);
-               for (int i = 0; i < units.Count; i++)
-            {
-                if (!(units[i].Team == owner.Team || units[i] is BaseTurret || units[i] is ObjBuilding || units[i] is Inhibitor))
-                {
-                    units[i].TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
-                    
-
-
-
-                    missile.SetToRemove();
-                    }
-                }
-
-            }
-
-
-  
+        {
+            Damage = 40 + (40 * spell.CastInfo.SpellLevel) + (Irelia.Stats.AbilityPower.Total * 0.5f) + (Irelia.Stats.AttackDamage.FlatBonus * 0.7f);
+            target.TakeDamage(Irelia, Damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
+            //AddParticleTarget(Irelia, Irelia, "irelia_ult_cas.troy", Irelia, lifetime: 1f);
+            AddParticleTarget(Irelia, target, "irelia_ult_tar.troy", Irelia, lifetime: 1f);
+            if (Damage > 0) { Irelia.Stats.CurrentHealth += Damage * 0.25f; }
+        }
     }
 }
-
-
