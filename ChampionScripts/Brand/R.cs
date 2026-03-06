@@ -1,4 +1,4 @@
-using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+﻿using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
 using GameServerCore.Enums;
@@ -87,29 +87,47 @@ namespace Spells
         public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
         {
             var owner = spell.CastInfo.Owner;
-            var AP = owner. Stats.AbilityPower.Total*0.5f;
+            var AP = owner.Stats.AbilityPower.Total * 0.5f;
             var damage = 150 + AP;
             target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
             AddBuff("BrandPassive", 5f, 1, spell, target, owner);
             AddBuff("BrandWildfire", 7f, 1, spell, owner, owner);
-
+            var wildfireBuff = owner.GetBuffWithName("BrandWildfire");
+            if (wildfireBuff == null || wildfireBuff.StackCount >= 5)
+                return;
+            var hitBuff = target.GetBuffWithName("BrandWildfire");
+if (hitBuff == null)
+{
+    AddBuff("BrandWildfire", 7f, 1, spell, target, owner);
+}
+else if (hitBuff.StackCount < 3)
+{
+    AddBuff("BrandWildfire", 7f, 1, spell, target, owner);
+}
             var units = GetUnitsInRange(target.Position, 750.0f, true)
-                .FindAll(unit => unit != target && unit.Team != owner.Team && !(unit is ObjBuilding || unit is BaseTurret) && !unit.IsDead)
-                .OrderBy(unit => unit.HasBuff("BrandPassive") && unit is Champion ? 0 : 1) // Prioritize units with "BrandPassive" buff
-                .ToList();
+    .FindAll(unit =>
+        unit.Team != owner.Team &&
+        unit != target &&
+        !unit.IsDead &&
+        !(unit is ObjBuilding || unit is BaseTurret)).Where(unit =>
+        {
+            var buff = unit.GetBuffWithName("BrandWildfire");
+            return buff == null || buff.StackCount < 3;
+        })
+.OrderBy(unit =>
+{
+    var buff = unit.GetBuffWithName("BrandWildfire");
+    return buff?.StackCount ?? 0;
+})
+.ThenBy(unit => unit is Champion ? 0 : 1)
+.ThenBy(unit => Vector2.DistanceSquared(unit.Position, target.Position))
+    .ToList();
 
-            foreach (var unit in units)
+            if (units.Count > 0)
             {
-                if (owner.GetBuffWithName("BrandWildfire").StackCount < 5)
-                {
-
-                    SpellCast(owner, 1, SpellSlotType.ExtraSlots, true, unit, target.Position);
-                    LogDebug("Hey, I hit someone from Missile");
-                    break;
-                }
+                SpellCast(owner, 1, SpellSlotType.ExtraSlots, true, units[0], target.Position);
             }
         }
-    }
-
-
-}
+            }
+        }
+    

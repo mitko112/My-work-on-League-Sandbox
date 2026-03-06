@@ -36,6 +36,10 @@ namespace CharScripts
             var owner = Spell.CastInfo.Owner;
             var target = damageData.Target;
             AddBuff("DariusHemoMarker", 5f, 1, Spell, target, owner);
+            if(target is Champion )
+            {
+                AddBuff("DariusHemoMS", 5f, 1, Spell, owner, owner);
+            }
 
         }
         

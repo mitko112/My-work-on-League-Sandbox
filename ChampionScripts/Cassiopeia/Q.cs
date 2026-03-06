@@ -15,6 +15,7 @@ namespace Spells
 {
     public class CassiopeiaNoxiousBlast : ISpellScript
     {
+        int StackCount;
         public SpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
             TriggersSpellCasts = true,
@@ -29,6 +30,7 @@ namespace Spells
         public void OnActivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
+            
         }
 
         public SpellSector DamageSector;
@@ -36,6 +38,14 @@ namespace Spells
        
         public void OnSpellCast(Spell spell)
         {
+            
+            var owner = spell.CastInfo.Owner;
+            AddBuff("CassiopeiaPassiveMana", 5f, 1, spell, owner, owner, false);
+            StackCount = owner.GetBuffWithName("CassiopeiaPassiveMana").StackCount;
+            
+            var mana = 3+1*spell.CastInfo.SpellLevel * StackCount;
+            owner.Stats.CurrentMana += mana;
+            
         }
 
         public void OnSpellPostCast(Spell spell)

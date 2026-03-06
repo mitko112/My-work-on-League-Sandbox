@@ -52,8 +52,9 @@ namespace Spells
             if (Target.IsDead)
             {
                 spell.SetCooldown(0.1f, false);
-
+                var mana = 100;
                 AddBuff("DariusRRefresh",20f,1, spell, owner, owner);
+                owner.Stats.CurrentMana += mana;
             }
 
 

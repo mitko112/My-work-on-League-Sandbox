@@ -1,15 +1,15 @@
-using static LeagueSandbox.GameServer.API.ApiFunctionManager;
-using LeagueSandbox.GameServer.Scripting.CSharp;
-using System.Numerics;
 using GameServerCore.Enums;
-using LeagueSandbox.GameServer.API;
-
 using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
 using LeagueSandbox.GameServer.GameObjects.SpellNS;
-using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
+using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using System.Numerics;
+using System.Security.Principal;
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 namespace Spells
 {
@@ -25,15 +25,25 @@ namespace Spells
 
 
         };
-
+        
         public void OnActivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
+            
         }
 
         public SpellSector DamageSector;
 
-
+        public void OnSpellCast(Spell spell)
+        {
+            var owner = spell.CastInfo.Owner;
+            
+            AddBuff("CassiopeiaPassiveMana", 5f, 1, spell, owner, owner, false);
+            var stackcount = owner.GetBuffWithName("CassiopeiaPassiveMana").StackCount;
+            
+            var mana = 7 + 1 * spell.CastInfo.SpellLevel *stackcount;
+            owner.Stats.CurrentMana += mana;
+        }
 
         public void OnSpellPostCast(Spell spell)
         {

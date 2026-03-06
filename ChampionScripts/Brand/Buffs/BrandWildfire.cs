@@ -16,18 +16,18 @@ namespace Buffs
             BuffType = BuffType.COMBAT_ENCHANCER,
             BuffAddType = BuffAddType.STACKS_AND_OVERLAPS,
             MaxStacks = 5
-            
+
         };
 
         public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-       
+
 
         public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
             LogInfo("BrandWildfire OnDeactivate called. Stacks: " + buff.StackCount + " Elapsed: " + buff.Elapsed());
         }
-           
-        
+
+
     }
 }

@@ -14,42 +14,26 @@ using LeagueSandbox.GameServer.GameObjects.StatsNS;
 using LeagueSandbox.GameServer.GameObjects;
 
 
-
 namespace Buffs
 {
-   
-    internal class DariusRRefresh : IBuffGameScript
+    internal class CassiopeiaPassiveMana: IBuffGameScript
     {
-
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
-            BuffType = BuffType.INTERNAL,
-            BuffAddType = BuffAddType.REPLACE_EXISTING,
-            MaxStacks = 1
+            BuffType = BuffType.COUNTER,
+            BuffAddType = BuffAddType.STACKS_AND_RENEWS,
+            MaxStacks = 5,
+            IsHidden = false
         };
 
 
         public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-         Spell Spell;
-
         public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-
-            Spell = ownerSpell;
-        }
-
-        public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
-        {
-            var owner = Spell.CastInfo.Owner;
-            owner.GetSpell("DariusExecute").SetCooldown(120f*Spell.CastInfo.SpellLevel, false);
             
         }
-        
 
-        public void OnUpdate(float diff)
-        {
 
-        }
     }
 }

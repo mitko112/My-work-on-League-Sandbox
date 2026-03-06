@@ -1,5 +1,3 @@
-
-
 using System.Numerics;
 using GameServerCore.Enums;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
@@ -48,3 +46,5 @@ namespace Spells
 
     }
 }
+
+

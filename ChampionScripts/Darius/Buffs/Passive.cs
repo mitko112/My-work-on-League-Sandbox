@@ -43,6 +43,7 @@ namespace Buffs
             owner = ownerSpell.CastInfo.Owner as Champion;
             Unit = unit;
             var ADratio = owner.Stats.AttackDamage.Total * 0.3f;
+            owner.GetSpell("DariusNoxianTacticsONH").LowerCooldown(1f);
             switch (buff.StackCount)
             {
                 case 1:
@@ -100,6 +101,7 @@ namespace Buffs
             {
                 Unit.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_PERIODIC, false);
                 timeSinceLastTick = 0f;
+                
             }
         }
     }

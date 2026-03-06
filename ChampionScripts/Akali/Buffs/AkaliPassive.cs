@@ -17,35 +17,66 @@ using LeagueSandbox.GameServer.GameObjects;
 
 namespace Buffs
 {
-   
-    internal class DariusRRefresh : IBuffGameScript
+    internal class AkaliPassive : IBuffGameScript
     {
-
         public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
-            BuffType = BuffType.INTERNAL,
+            BuffType = BuffType.DAMAGE,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
             MaxStacks = 1
         };
 
-
         public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
-         Spell Spell;
+        
+            public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
+        {
+            float bonusAD = unit.Stats.AttackDamage.FlatBonus;
 
-        public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
+            StatsModifier.SpellVamp.FlatBonus =
+                0.06f + (bonusAD / 6f) * 0.01f;
+
+            unit.AddStatModifier(StatsModifier);
+
+            if (unit is ObjAIBase obj)
+            {
+                ApiEventManager.OnLaunchAttack.AddListener(this, obj, TargetExecute, false);
+
+                
+
+
+            }
+        }
+        public void TargetExecute(Spell spell)
+
+
         {
 
-            Spell = ownerSpell;
+            var owner = spell.CastInfo.Owner;
+            var target = spell.CastInfo.Targets[0].Unit;
+            float bonusAD = owner.Stats.AttackDamage.FlatBonus;
+
+            float percent =
+                0.06f + (bonusAD / 6f) * 0.01f;
+
+            float damage =
+                owner.Stats.AttackDamage.Total * percent;
+
+
+
+
+            target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_ATTACK, false);
+
+
         }
+
+
 
         public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
         {
-            var owner = Spell.CastInfo.Owner;
-            owner.GetSpell("DariusExecute").SetCooldown(120f*Spell.CastInfo.SpellLevel, false);
-            
+            ApiEventManager.OnLaunchAttack.RemoveListener(this);
+
         }
-        
 
         public void OnUpdate(float diff)
         {

@@ -1,15 +1,15 @@
 using GameServerCore.Enums;
-
-using LeagueSandbox.GameServer.Scripting.CSharp;
-using System.Numerics;
-using LeagueSandbox.GameServer.API;
-using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
 using LeagueSandbox.GameServer.GameObjects.SpellNS;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
 using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using System.Numerics;
+using System.Security.Principal;
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 namespace Spells
 {
@@ -24,10 +24,25 @@ namespace Spells
                 Type = MissileType.Target
             }
         };
+        int StackCount;
+
 
         public void OnActivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
+            
+        }
+
+        public void OnSpellCast(Spell spell)
+        {
+
+            var owner = spell.CastInfo.Owner;
+            AddBuff("CassiopeiaPassiveMana", 5f, 1, spell, owner, owner, false);
+            StackCount = owner.GetBuffWithName("CassiopeiaPassiveMana").StackCount;
+            
+            var mana = 5 + 1 * spell.CastInfo.SpellLevel * StackCount;
+            owner.Stats.CurrentMana += mana;
+
         }
 
         public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)

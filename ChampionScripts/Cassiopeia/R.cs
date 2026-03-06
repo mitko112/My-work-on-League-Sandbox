@@ -1,15 +1,15 @@
-using GameServerCore.Enums;
-
-using static LeagueSandbox.GameServer.API.ApiFunctionManager;
-using LeagueSandbox.GameServer.Scripting.CSharp;
-using System.Numerics;
+﻿using GameServerCore.Enums;
 using GameServerCore.Scripting.CSharp;
 using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
 using LeagueSandbox.GameServer.GameObjects.SpellNS;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
 using LeagueSandbox.GameServer.GameObjects.SpellNS.Missile;
 using LeagueSandbox.GameServer.GameObjects.SpellNS.Sector;
+using LeagueSandbox.GameServer.Scripting.CSharp;
+using System;
+using System.Numerics;
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 namespace Spells
 {
@@ -26,10 +26,23 @@ namespace Spells
         public void OnActivate(ObjAIBase owner, Spell spell)
         {
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
+            
         }
 
-       
 
+        int StackCount;
+
+        public void OnSpellCast(Spell spell)
+        {
+
+            var owner = spell.CastInfo.Owner;
+            AddBuff("CassiopeiaPassiveMana", 5f, 1, spell, owner, owner, false);
+            StackCount = owner.GetBuffWithName("CassiopeiaPassiveMana").StackCount;
+            
+            var mana = 10 * StackCount;
+            owner.Stats.CurrentMana += mana;
+
+        }
         public void OnSpellPostCast(Spell spell)
         {
             var owner = spell.CastInfo.Owner;
@@ -50,6 +63,33 @@ namespace Spells
             AddParticleTarget(owner, owner, "CassPetrify_cas.troy", owner, 1f, 1f);
         }
 
+        private bool IsFacingCassiopeia(AttackableUnit target, AttackableUnit cassio)
+        {
+            // Rotation stored in Position.Y (radians)
+            float rot = target.Position.Y;
+
+            // Target forward vector
+            float forwardX = (float)Math.Cos(rot);
+            float forwardY = (float)Math.Sin(rot);
+
+            // Direction from target → Cassio
+            float dirX = cassio.Position.X - target.Position.X;
+            float dirY = cassio.Position.Y - target.Position.Y;
+
+            float length = (float)Math.Sqrt(dirX * dirX + dirY * dirY);
+            if (length <= 0.001f)
+                return false;
+
+            dirX /= length;
+            dirY /= length;
+
+            // Dot product
+            float dot = (forwardX * dirX) + (forwardY * dirY);
+
+            // Facing Cassio
+            return dot > 0f;
+        }
+
         public void TargetExecute(Spell spell, AttackableUnit target, SpellMissile missile, SpellSector sector)
         {
             var owner = spell.CastInfo.Owner;
@@ -58,8 +98,19 @@ namespace Spells
             var damage = 200+ spell.CastInfo.SpellLevel + ap;
 
 
+
             target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
-            AddBuff("Stun", 2f, 1, spell, target, owner);
+
+            if (IsFacingCassiopeia(target, owner))
+            {
+                // Facing Cass → STUN
+                AddBuff("Stun", 2.0f, 1, spell, target, owner);
+            }
+            else
+            {
+                // Not facing Cass → SLOW
+                AddBuff("CassiopeiaPetrifySlow", 2.0f, 1, spell, target, owner);
+            }
         }
 
         

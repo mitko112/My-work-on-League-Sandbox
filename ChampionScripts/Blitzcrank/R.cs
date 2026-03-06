@@ -22,6 +22,14 @@ namespace Spells
 
         public void OnActivate(ObjAIBase owner, Spell spell)
         {
+            AddBuff(
+    "BlitzcrankRPulse",
+    float.MaxValue,
+    spell.CastInfo.SpellLevel, // stacks = R rank
+    spell,
+    owner,
+    owner
+);
             ApiEventManager.OnSpellHit.AddListener(this, spell, TargetExecute, false);
         }
 

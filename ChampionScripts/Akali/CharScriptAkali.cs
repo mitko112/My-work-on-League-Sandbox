@@ -1,7 +1,17 @@
-
+using System.Numerics;
+using LeagueSandbox.GameServer.API;
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using LeagueSandbox.GameServer.Scripting.CSharp;
 using GameServerCore.Scripting.CSharp;
-using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
 using LeagueSandbox.GameServer.GameObjects.SpellNS;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using GameServerLib.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings;
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBuildings;
+using GameServerCore.Enums;
+using LeagueSandbox.GameServer.GameObjects.StatsNS;
+using LeagueSandbox.GameServer.GameObjects;
 
 namespace CharScripts
 {
@@ -9,8 +19,7 @@ namespace CharScripts
     {
         public void OnActivate(ObjAIBase owner, Spell spell = null)
         {
-            var bonusAd = owner.Stats.AttackDamage.Total - owner.Stats.AttackDamage.BaseValue;
-            owner.Stats.SpellVamp.PercentBonus = 6 + bonusAd % 6;
+            AddBuff("AkaliPassive", 1, 1, spell, owner, owner, true);
         }
         public void OnDeactivate(ObjAIBase owner, Spell spell = null)
         {

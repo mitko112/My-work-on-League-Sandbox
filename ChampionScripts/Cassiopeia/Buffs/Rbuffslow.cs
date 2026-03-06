@@ -12,38 +12,31 @@ using LeagueSandbox.GameServer.GameObjects.AttackableUnits.Buildings.AnimatedBui
 using GameServerCore.Enums;
 using LeagueSandbox.GameServer.GameObjects.StatsNS;
 using LeagueSandbox.GameServer.GameObjects;
-using static LeaguePackets.Game.Common.CastInfo;
+
 
 namespace Buffs
 {
-    internal class AkaliWStealth : IBuffGameScript
+    internal class CassiopeiaPetrifySlow : IBuffGameScript
     {
-        public  BuffScriptMetaData BuffMetaData { get; } = new()
+        public BuffScriptMetaData BuffMetaData { get; set; } = new BuffScriptMetaData
         {
-            BuffType = BuffType.AURA,
+            BuffType = BuffType.SLOW,
             BuffAddType = BuffAddType.REPLACE_EXISTING,
-            MaxStacks = 1,
-            IsHidden = false
+            MaxStacks = 1
         };
-        public StatsModifier StatsModifier { get; protected set; } = new();
+
+
+        public StatsModifier StatsModifier { get; private set; } = new StatsModifier();
 
         public void OnActivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
-
         {
-            StatsModifier.Armor.FlatBonus = 10;
-            StatsModifier.MagicResist.FlatBonus = 10;
+            StatsModifier.MoveSpeed.PercentBonus -= 0.6f;
+           
             unit.AddStatModifier(StatsModifier);
-            
-            unit.SetStatus(StatusFlags.Stealthed, true);
-            
 
-        }
-            public void OnDeactivate(AttackableUnit unit, Buff buff, Spell ownerSpell)
-            {
-                unit.SetStatus(StatusFlags.Stealthed, false);
-                
-        }
+            AddParticleTarget(ownerSpell.CastInfo.Owner, null, "Global_Slow.troy", unit, buff.Duration);
         }
 
-        }
-    
+  
+    }
+}
