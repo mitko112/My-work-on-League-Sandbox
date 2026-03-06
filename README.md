@@ -1,21 +1,22 @@
 List of fully finished champions:
 1.Amumu
-2.Brand
-3.Cassiopeia
-4.Cho'Gath
-5.Darius
-6.Dr. Mundo
-7.Fiora
-8.Fizz
-9.Garen
-10.Jax
-11.Kayle
-12.Malphite
-13.Nasus
-14.Poppy
-15.Renekton
-16.Sion
-17.Tristana
-18.Tryndamere
-19.Warwick
-20. Xin Zhao
+2.Akali
+3.Brand
+4.Cassiopeia
+5.Cho'Gath
+6.Darius
+7.Dr. Mundo
+8.Fiora
+9.Fizz
+10.Garen
+11.Jax
+12.Kayle
+13.Malphite
+14.Nasus
+15.Poppy
+16.Renekton
+17.Sion
+18.Tristana
+19.Tryndamere
+20.Warwick
+21.Xin Zhao
